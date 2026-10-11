@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System · Page not found">
+  <title>Not Found · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#3b82f6',
+              600: '#2563eb'
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              400: '#9ca3af',
+              500: '#6b7280',
+              700: '#374151',
+              900: '#111827'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          },
+          boxShadow: {
+            brand: '0 12px 32px rgba(59, 130, 246, 0.18)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center px-6 py-10">
+  <main class="w-full max-w-3xl">
+    <div class="bg-white/90 backdrop-blur shadow-brand border border-gray-100 rounded-3xl overflow-hidden">
+      <div class="px-10 py-12 text-center space-y-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-red-50 text-red-600 shadow-inner">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </div>
+        <div class="space-y-3">
+          <p class="text-sm font-semibold tracking-widest text-brand-600 uppercase">Error 404</p>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900">Page not found</h1>
+          <p class="text-sm md:text-base text-gray-500 max-w-xl mx-auto">
+            The page you were trying to reach couldn’t be found. It might have been moved, renamed, or you may not have access to view it.
+          </p>
+        </div>
+        <button id="backButton"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition-colors shadow-brand">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Go back
+        </button>
+      </div>
+    </div>
+    <p class="mt-8 text-xs text-gray-400 text-center">Smart Attendance System · Please contact the administrator if you believe this is an error.</p>
+  </main>
+  <script>
+    document.getElementById('backButton').addEventListener('click', () => {
+      window.location.replace('home.html');
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        window.location.replace('home.html');
+      }
+    });
+  </script>
+</body>
+</html>

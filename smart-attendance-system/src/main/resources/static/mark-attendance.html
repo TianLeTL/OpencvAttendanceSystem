@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Smart Attendance System · Take attendance with live face recognition and manual review">
+  <title>Mark Attendance · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a'
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce'
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          },
+          boxShadow: {
+            'soft': '0 8px 24px rgba(15, 23, 42, 0.08)',
+            'soft-lg': '0 20px 50px rgba(15, 23, 42, 0.12)',
+            'brand': '0 12px 32px rgba(59, 130, 246, 0.18)'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.25s ease-out'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0, transform: 'translateY(4px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+    /* Legacy class hooks referenced in existing JS logic */
+    .queue-item {
+      background: #fff;
+      border: 1px solid #fde68a;
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      box-shadow: 0 8px 18px rgba(250, 204, 21, 0.12);
+    }
+
+    .queue-item header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .queue-item header h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .queue-item header span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #b45309;
+    }
+
+    .queue-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .queue-actions button {
+      flex: 1 1 0;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .queue-actions .confirm {
+      background: #22c55e;
+      color: #022c22;
+      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.25);
+    }
+
+    .queue-actions .reject {
+      background: #ef4444;
+      color: #fef2f2;
+      box-shadow: 0 8px 18px rgba(239, 68, 68, 0.25);
+    }
+
+    .queue-actions button:hover {
+      transform: translateY(-1px);
+    }
+
+    .muted {
+      color: #9ca3af;
+    }
+
+    #queueContainer.muted {
+      color: #9ca3af;
+    }
+
+    .event-log-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .event-log-list li {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: grid;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .event-log-list li .meta {
+      font-size: 0.75rem;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translate(-50%, -20px);
+      background: rgba(34, 197, 94, 0.95);
+      color: #022c22;
+      padding: 16px 22px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 16px 40px rgba(34, 197, 94, 0.35);
+      z-index: 120;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toast.warn {
+      background: rgba(245, 158, 11, 0.92);
+      color: #431407;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35);
+    }
+
+    .toast.error {
+      background: rgba(239, 68, 68, 0.95);
+      color: #450a0a;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.35);
+    }
+
+    #preview {
+      display: none;
+    }
+
+    #preview.active {
+      display: block;
+    }
+
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+
+    .video-placeholder svg {
+      width: 4rem;
+      height: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen gradient-light text-gray-900">
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden"
+    aria-hidden="true"></div>
+
+  <aside id="sidebar"
+    class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar"
+          class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          aria-label="Close menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+            </path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="students.html" data-role="admin-only"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="courses.html" data-role="admin-only"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+          </svg>
+          <span>Courses</span>
+        </a>
+        <a href="sessions.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+        <a href="mark-attendance.html"
+          class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl"
+          aria-current="page">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+            </path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only"
+            class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+              </path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200">
+      <div class="flex flex-wrap items-center justify-between gap-4 px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle"
+            class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Open menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Mark Attendance</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Select an open session, take attendance, and approve any
+              low-confidence matches.</p>
+          </div>
+        </div>
+        <div class="text-sm text-right">
+          <span id="statusPill"
+            class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 rounded-full">Idle</span>
+          <p id="profileSummary" class="text-xs text-gray-500 mt-1"></p>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-6">
+      <section class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-4">
+        <div class="flex flex-wrap items-end gap-4 justify-between">
+          <div class="flex-1 min-w-[240px] space-y-2">
+            <label for="sessionSelect" class="text-xs font-semibold text-gray-500 tracking-wide uppercase">Open
+              session</label>
+            <div class="relative">
+              <select id="sessionSelect"
+                class="block w-full rounded-xl border border-gray-200 bg-gray-25 px-4 py-3 pr-10 text-sm font-medium text-gray-900 focus:border-brand-400 focus:ring focus:ring-brand-200/60 appearance-none">
+                <option value="" disabled selected>Select open session</option>
+              </select>
+              <svg class="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="refreshSessionsBtn"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9H4m0 0V4m16 16v-5h-.581m0 0a8.003 8.003 0 01-15.356-2H4m16 7h.001">
+                </path>
+              </svg>
+              Refresh
+            </button>
+            <button id="startBtn"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-brand transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M14.752 11.168l-5.197-3.029A1 1 0 008 9.028v5.944a1 1 0 001.555.832l5.197-3.029a1 1 0 000-1.664z">
+                </path>
+              </svg>
+              Take Attendance
+            </button>
+            <button id="stopBtn"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Stop
+            </button>
+          </div>
+        </div>
+        <p id="errorBanner"
+          class="text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+          style="display:none"></p>
+      </section>
+
+      <section class="grid gap-6 xl:grid-cols-[2fr,1fr]">
+        <div class="space-y-6">
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-soft-lg overflow-hidden">
+            <div
+              class="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-gray-25">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Live recognition feed</h3>
+                <p class="text-sm text-gray-600">Bounding boxes and labels are drawn for each detected attendee.</p>
+              </div>
+            </div>
+            <div class="relative bg-gray-900 overflow-hidden rounded-b-2xl">
+              <div class="relative w-full" style="padding-bottom: 56.25%;">
+                <div class="video-placeholder" id="videoPlaceholder">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <p>Camera feed will appear here when started</p>
+                </div>
+                <video id="preview" autoplay playsinline
+                  class="absolute inset-0 w-full h-full object-contain bg-gray-900"></video>
+                <canvas id="overlayCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+              </div>
+            </div>
+
+
+
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Review queue</h3>
+                <p class="text-xs text-gray-500">Low-confidence matches will appear here.</p>
+              </div>
+              <span id="queueCount"
+                class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full">0
+                pending</span>
+            </div>
+            <div id="queueContainer"
+              class="muted rounded-xl border border-dashed border-amber-200 bg-amber-50/40 px-4 py-6 text-sm">
+              Low-confidence matches will appear here for confirmation.
+            </div>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Event log</h3>
+                <p class="text-xs text-gray-500">Recent recognition and system events.</p>
+              </div>
+              <button id="clearLogBtn"
+                class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 13h6m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5l2 2h5a2 2 0 012 2v12a2 2 0 01-2 2z"></path>
+                </svg>
+                Clear
+              </button>
+            </div>
+            <ul id="eventLog" class="event-log-list max-h-80 overflow-y-auto"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    function getLoggedInUser() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        handleUnauthorized();
+        return null;
+      }
+    }
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || 'ADMIN').toUpperCase();
+      const isAdmin = role === 'ADMIN';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role=\"admin-only\"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    (() => {
+      const currentUser = getLoggedInUser();
+      if (!currentUser) {
+        return;
+      }
+      initialiseUserInterface(currentUser);
+      const currentUserId = currentUser.userId ?? null;
+      const API_BASE = '/api/recognition';
+      const preview = document.getElementById('preview');
+      const overlayCanvas = document.getElementById('overlayCanvas');
+      const overlayCtx = overlayCanvas.getContext('2d');
+      const sessionSelect = document.getElementById('sessionSelect');
+      const refreshSessionsBtn = document.getElementById('refreshSessionsBtn');
+      const startBtn = document.getElementById('startBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const errorBanner = document.getElementById('errorBanner');
+      const statusPill = document.getElementById('statusPill');
+      const eventLog = document.getElementById('eventLog');
+      const profileSummary = document.getElementById('profileSummary');
+      const queueContainer = document.getElementById('queueContainer');
+      const queueCount = document.getElementById('queueCount');
+      const clearLogBtn = document.getElementById('clearLogBtn');
+      const toast = document.getElementById('toast');
+
+      const reviewItems = new Map();
+      let mediaStream = null;
+      let captureTimer = null;
+      let frameBusy = false;
+      let currentSessionId = null;
+      let eventSource = null;
+      let lastBoundingBoxes = [];
+      let toastTimer = null;
+      const toastQueue = [];
+      const TOAST_DELAY = 1000;
+
+      const captureCanvas = document.createElement('canvas');
+      const captureCtx = captureCanvas.getContext('2d');
+
+      async function loadSessions(selectedId) {
+        setStatus('Loading sessions…');
+        try {
+          const res = await authFetch(`${API_BASE}/sessions/open`);
+          if (!res.ok) throw new Error(`Failed (${res.status})`);
+          const body = await res.json();
+          const sessions = body.data ?? [];
+          sessionSelect.innerHTML = '';
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = sessions.length ? 'Select open session' : 'No open sessions';
+          placeholder.disabled = true;
+          placeholder.selected = true;
+          sessionSelect.appendChild(placeholder);
+          sessions.forEach(session => {
+            const option = document.createElement('option');
+            option.value = session.sessionId;
+            option.textContent = `${session.courseCode}-${session.sectionCode} (${session.sessionDate} ${session.startTime})`;
+            sessionSelect.appendChild(option);
+          });
+          if (selectedId) {
+            const match = [...sessionSelect.options].find(opt => Number(opt.value) === Number(selectedId));
+            if (match) {
+              match.selected = true;
+              statusPill.textContent = 'Session ready';
+            }
+          }
+          queueContainer.innerHTML = sessions.length ? 'Low-confidence matches will appear here for confirmation.' : 'Open a session to begin recognition.';
+          queueContainer.classList.add('muted');
+          errorBanner.style.display = 'none';
+          setStatus('Idle');
+          profileSummary.textContent = '';
+        } catch (error) {
+          showError(error.message || 'Unable to load sessions.');
+        }
+      }
+
+      function setStatus(text) {
+        statusPill.textContent = text;
+      }
+
+      function showError(text) {
+        errorBanner.textContent = text;
+        errorBanner.style.display = 'block';
+        showToast(text, 'error');
+      }
+
+      function hideError() {
+        errorBanner.style.display = 'none';
+      }
+
+      function dequeueToast() {
+        if (!toast || toastQueue.length === 0) {
+          toastTimer = null;
+          toast?.classList.remove('show');
+          return;
+        }
+        const { message, type } = toastQueue.shift();
+        toast.className = 'toast';
+        if (type === 'warn') {
+          toast.classList.add('warn');
+        } else if (type === 'error') {
+          toast.classList.add('error');
+        }
+        toast.textContent = message;
+        requestAnimationFrame(() => toast.classList.add('show'));
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+          toastTimer = setTimeout(dequeueToast, 200);
+        }, TOAST_DELAY);
+      }
+
+      function showToast(message, type = 'success') {
+        toastQueue.push({ message, type });
+        if (!toastTimer) {
+          dequeueToast();
+        }
+      }
+
+
+      async function startScanner() {
+        hideError();
+        const sessionId = Number(sessionSelect.value);
+        if (!sessionId) {
+          showError('Select an open session first.');
+          return;
+        }
+
+        try {
+          await ensureCamera();
+          const res = await authFetch(`${API_BASE}/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId })
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.message || `Failed to start scanner (${res.status})`);
+          }
+          currentSessionId = sessionId;
+          subscribeToEvents(sessionId);
+          beginCaptureLoop();
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+          setStatus('Capturing…');
+        } catch (error) {
+          showError(error.message || 'Unable to start scanner.');
+          stopScanner();
+        }
+      }
+
+      async function stopScanner() {
+        stopBtn.disabled = true;
+        startBtn.disabled = false;
+        setStatus('Idle');
+        hideError();
+
+        if (captureTimer) {
+          clearInterval(captureTimer);
+          captureTimer = null;
+        }
+
+        frameBusy = false;
+
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+
+        if (currentSessionId) {
+          authFetch(`${API_BASE}/stop`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: currentSessionId })
+          }).catch(() => { });
+          currentSessionId = null;
+        }
+
+        // Properly close camera feed
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(track => track.stop());
+          mediaStream = null;
+        }
+
+        // Clear video element
+        if (preview.srcObject) {
+          preview.srcObject = null;
+        }
+        clearOverlay();
+
+
+        // Hide video preview and show placeholder
+        // Add this after clearing the video srcObject
+        preview.classList.remove('active');
+        const placeholder = document.getElementById('videoPlaceholder');
+        if (placeholder) placeholder.style.display = 'flex';
+      }
+
+
+      async function ensureCamera() {
+        if (mediaStream) return;
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        preview.srcObject = mediaStream;
+        preview.classList.add('active');
+        document.getElementById('videoPlaceholder').style.display = 'none';
+
+        await new Promise(resolve => {
+          if (preview.readyState >= 2) resolve();
+          else preview.onloadedmetadata = resolve;
+        });
+
+        resizeCanvases();
+      }
+
+
+
+      function resizeCanvases() {
+        const width = preview.videoWidth || 1280;
+        const height = preview.videoHeight || 720;
+        overlayCanvas.width = width;
+        overlayCanvas.height = height;
+        captureCanvas.width = width;
+        captureCanvas.height = height;
+
+        // Clear any previous drawings
+        overlayCtx.clearRect(0, 0, width, height);
+      }
+
+
+      function beginCaptureLoop() {
+        if (captureTimer) {
+          clearInterval(captureTimer);
+        }
+        captureTimer = setInterval(captureFrame, 400);
+      }
+
+      async function captureFrame() {
+        if (!currentSessionId || frameBusy) return;
+        if (!preview.videoWidth) return;
+        frameBusy = true;
+        try {
+          captureCtx.drawImage(preview, 0, 0, captureCanvas.width, captureCanvas.height);
+          const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.85);
+          await authFetch(`${API_BASE}/frame`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: currentSessionId, imageData: dataUrl })
+          });
+        } catch (error) {
+          showError('Failed to send frame: ' + (error.message || 'network error'));
+          stopScanner();
+        } finally {
+          frameBusy = false;
+        }
+      }
+
+      function subscribeToEvents(sessionId) {
+        if (eventSource) {
+          eventSource.close();
+        }
+        eventSource = new EventSource(`${API_BASE}/events?sessionId=${sessionId}`);
+        eventSource.onopen = () => {
+          addLog('Connected to recognition stream.', 'connected');
+        };
+        eventSource.onerror = () => {
+          addLog('Connection lost. Attempting to reconnect…', 'warning');
+        };
+
+        eventSource.addEventListener('recognition.ready', ev => {
+          const data = parseEvent(ev);
+          profileSummary.textContent = `${data.profilesLoaded ?? 0} student profiles loaded.`;
+          addLog('Scanner ready.', 'info');
+        });
+        eventSource.addEventListener('recognition.overlay', ev => {
+          const data = parseEvent(ev);
+          const boxes = Array.isArray(data.boxes) ? data.boxes : [];
+          lastBoundingBoxes = boxes.map(box => ({
+            ...box,
+            color: box.color || '#60a5fa',
+            label: box.label || null
+          }));
+          renderOverlay();
+        });
+        eventSource.addEventListener('recognition.auto-marked', ev => {
+          const data = parseEvent(ev);
+          addLog(`${data.studentName ?? data.studentId} marked ${data.status} (${data.confidence?.toFixed?.(1) ?? data.confidence}% )`, 'success');
+          showToast(`${data.studentName ?? data.studentId} marked ${data.status}`, 'success');
+        });
+        eventSource.addEventListener('recognition.review', ev => {
+          const data = parseEvent(ev);
+          enqueueReview(data);
+          drawBoundingBox(data.boundingBox, '#f59e0b', data.label || null);
+          addLog(`Review needed: ${data.studentName ?? data.studentId} (${data.confidence?.toFixed?.(1) ?? data.confidence}% )`, 'review');
+        });
+        eventSource.addEventListener('recognition.review-update', ev => {
+          const data = parseEvent(ev);
+          updateReviewItem(data);
+          drawBoundingBox(data.boundingBox, '#f59e0b', data.label || null);
+          addLog(`Review updated: ${data.studentName ?? data.studentId} (${data.confidence?.toFixed?.(1) ?? data.confidence}% )`, 'review');
+        });
+        eventSource.addEventListener('recognition.review-confirmed', ev => {
+          const data = parseEvent(ev);
+          removeReview(data.token);
+          addLog(`Review confirmed for ${data.studentName ?? data.studentId}.`, 'success');
+          showToast(`Review confirmed for ${data.studentName ?? data.studentId}`, 'success');
+        });
+        eventSource.addEventListener('recognition.review-cleared', ev => {
+          const data = parseEvent(ev);
+          removeReview(data.token);
+          addLog(`Review auto-resolved for ${data.studentName ?? data.studentId}.`, 'success');
+        });
+        eventSource.addEventListener('recognition.review-rejected', ev => {
+          const data = parseEvent(ev);
+          removeReview(data.token);
+          addLog('Review rejected.', 'warning');
+          showToast('Review rejected', 'warn');
+        });
+        eventSource.addEventListener('recognition.skipped', ev => {
+          const data = parseEvent(ev);
+          const reason = data.reason || 'Skipped';
+          const name = data.studentName || data.studentId || '';
+          addLog(`${reason}${name ? ' — ' + name : ''}`, 'skip');
+          drawBoundingBox(data.boundingBox, '#ef4444', data.label || reason);
+        });
+        eventSource.addEventListener('recognition.empty-roster', () => {
+          addLog('Session roster is empty; no students to recognise.', 'warning');
+          showToast('Session roster is empty.', 'warn');
+        });
+        eventSource.addEventListener('recognition.no-training-data', () => {
+          addLog('No training data available yet. Upload student photos to begin.', 'warning');
+          showToast('No training data available yet.', 'warn');
+        });
+        eventSource.addEventListener('recognition.idle', () => {
+          clearOverlay();
+        });
+        eventSource.addEventListener('session-closed', () => {
+          addLog('Session closed. Scanner stopped.', 'warning');
+          stopScanner();
+        });
+      }
+
+      function parseEvent(ev) {
+        try {
+          return JSON.parse(ev.data);
+        } catch (error) {
+          return {};
+        }
+      }
+
+      function enqueueReview(data) {
+        if (!data || !data.token) return;
+        if (reviewItems.has(data.token)) {
+          updateReviewItem(data);
+          return;
+        }
+        const faceCount = Number(data.faceCount ?? 1);
+        const faceLabel = faceCount > 1 ? `${faceCount} detections this pass` : 'Single detection';
+        const item = document.createElement('div');
+        item.className = 'queue-item';
+        item.dataset.token = data.token;
+        item.innerHTML = `
+      <header>
+        <h3>${data.studentName ?? data.studentId}</h3>
+        <span>${(data.confidence ?? 0).toFixed(1)}%</span>
+      </header>
+      <div class="muted">${faceLabel}. Confirm if this is ${data.studentName ?? data.studentId}.</div>
+      <div class="queue-actions">
+        <button class="confirm">Confirm (Y)</button>
+        <button class="reject">Reject (N)</button>
+      </div>
+    `;
+        item.dataset.faceCount = faceCount;
+        item.querySelector('.confirm').addEventListener('click', () => resolveReview(data.token, true));
+        item.querySelector('.reject').addEventListener('click', () => resolveReview(data.token, false));
+
+        if (queueContainer.classList.contains('muted')) {
+          queueContainer.classList.remove('muted');
+          queueContainer.innerHTML = '';
+        }
+        queueContainer.prepend(item);
+        reviewItems.set(data.token, item);
+        updateQueueCount();
+      }
+
+      function updateReviewItem(data) {
+        if (!data || !data.token) return;
+        const item = reviewItems.get(data.token);
+        if (!item) {
+          enqueueReview(data);
+          return;
+        }
+        const headerName = item.querySelector('header h3');
+        const confidenceEl = item.querySelector('header span');
+        const messageEl = item.querySelector('.muted');
+        if (headerName) {
+          headerName.textContent = data.studentName ?? data.studentId ?? 'Unknown';
+        }
+        if (confidenceEl) {
+          confidenceEl.textContent = `${(data.confidence ?? 0).toFixed(1)}%`;
+        }
+        if (messageEl) {
+          const displayName = data.studentName ?? data.studentId ?? 'this student';
+          const faceCount = Number(data.faceCount ?? item.dataset.faceCount ?? 1);
+          const faceLabel = faceCount > 1 ? `${faceCount} detections this pass` : 'Single detection';
+          messageEl.textContent = `${faceLabel}. Confirm if this is ${displayName}.`;
+          item.dataset.faceCount = faceCount;
+        }
+      }
+
+      async function resolveReview(token, accepted) {
+        try {
+          await authFetch(`${API_BASE}/review/${token}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accepted, markedByUserId: currentUserId })
+          });
+        } catch (error) {
+          addLog('Failed to resolve review: ' + (error.message || 'network error'), 'error');
+        }
+      }
+
+      function removeReview(token) {
+        const item = reviewItems.get(token);
+        if (!item) return;
+        item.remove();
+        reviewItems.delete(token);
+        updateQueueCount();
+        if (reviewItems.size === 0) {
+          queueContainer.classList.add('muted');
+          queueContainer.innerHTML = 'Low-confidence matches will appear here for confirmation.';
+        }
+      }
+
+      function updateQueueCount() {
+        queueCount.textContent = `${reviewItems.size} pending`;
+      }
+
+      function addLog(message, type) {
+        const entry = document.createElement('li');
+        entry.innerHTML = `
+      <div>${message}</div>
+      <div class="meta">
+        <span>${new Date().toLocaleTimeString()}</span>
+        <span>${type}</span>
+      </div>
+    `;
+        eventLog.prepend(entry);
+        while (eventLog.children.length > 50) {
+          eventLog.removeChild(eventLog.lastChild);
+        }
+      }
+
+      function drawBoundingBox(box, color, label = null) {
+        if (!box || typeof box.x !== 'number') {
+          return;
+        }
+        const normalized = { ...box, color, label };
+        lastBoundingBoxes.push(normalized);
+        renderOverlay();
+      }
+
+      function clearOverlay() {
+        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        lastBoundingBoxes = [];
+      }
+
+      function renderOverlay() {
+        overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        if (!lastBoundingBoxes.length) return;
+        overlayCtx.lineWidth = 2;
+        overlayCtx.font = 'bold 18px Inter, sans-serif';
+        overlayCtx.textBaseline = 'bottom';
+        lastBoundingBoxes.forEach(box => {
+          const scaleX = overlayCanvas.width / (box.frameWidth || overlayCanvas.width);
+          const scaleY = overlayCanvas.height / (box.frameHeight || overlayCanvas.height);
+          const x = box.x * scaleX;
+          const y = box.y * scaleY;
+          const width = box.width * scaleX;
+          const height = box.height * scaleY;
+          overlayCtx.strokeStyle = box.color || '#60a5fa';
+          overlayCtx.fillStyle = (box.color || '#60a5fa') + '33';
+          overlayCtx.fillRect(x, y, width, height);
+          overlayCtx.strokeRect(x, y, width, height);
+          if (box.label) {
+            const text = String(box.label);
+            const padding = 8;
+            const textHeight = 24;  // Increased for larger font
+            const metrics = overlayCtx.measureText(text);
+            const backWidth = metrics.width + (padding * 2);
+            const backHeight = textHeight + padding;
+            const backX = x;
+            const backY = Math.max(0, y - backHeight);
+
+            // Darker, more opaque background for better contrast
+            overlayCtx.fillStyle = 'rgba(15,23,42,0.95)';
+            overlayCtx.fillRect(backX, backY, backWidth, backHeight);
+
+            // Brighter white text for better readability
+            overlayCtx.fillStyle = '#ffffff';
+            overlayCtx.fillText(text, backX + padding, backY + backHeight - padding);
+          }
+
+        });
+      }
+
+      function parseQuerySession() {
+        const params = new URLSearchParams(location.search);
+        const sessionId = params.get('sessionId');
+        if (!sessionId) return;
+        return Number(sessionId);
+      }
+
+      setupLogoutModal(async () => {
+        try {
+          await authFetch('/api/auth/logout', { method: 'POST' });
+        } catch (error) {
+          console.error('Logout API error', error);
+        } finally {
+          sessionStorage.removeItem('loggedInUser');
+          sessionStorage.removeItem('authToken');
+          window.location.href = 'index.html';
+        }
+      });
+
+      refreshSessionsBtn.addEventListener('click', () => loadSessions(parseInt(sessionSelect.value, 10)));
+      startBtn.addEventListener('click', startScanner);
+      stopBtn.addEventListener('click', stopScanner);
+      clearLogBtn.addEventListener('click', () => { eventLog.innerHTML = ''; });
+      window.addEventListener('resize', () => requestAnimationFrame(resizeCanvases));
+
+      document.addEventListener('keydown', event => {
+        if (reviewItems.size === 0) return;
+        const first = reviewItems.values().next().value;
+        if (!first) return;
+        if (event.key.toLowerCase() === 'y') {
+          resolveReview(first.dataset.token, true);
+        } else if (event.key.toLowerCase() === 'n') {
+          resolveReview(first.dataset.token, false);
+        }
+      });
+
+      preview.addEventListener('loadedmetadata', () => {
+        resizeCanvases();
+        renderOverlay();
+      });
+
+      const initialSession = parseQuerySession();
+      loadSessions(initialSession);
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      const openBtn = document.getElementById('menuToggle');
+      const closeBtn = document.getElementById('closeSidebar');
+
+      function openMenu() {
+        sidebar.classList.add('open');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      openBtn?.addEventListener('click', openMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      overlay?.addEventListener('click', closeMenu);
+    })();
+  </script>
+</body>
+
+</html>

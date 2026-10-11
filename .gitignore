@@ -1,0 +1,30 @@
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE / Editors =====
+.idea/
+*.iml
+.vscode/
+
+# ===== Java / Maven / Spring Boot =====
+target/
+*.class
+*.log
+
+# ===== Node/Web builds (if any) =====
+node_modules/
+dist/
+build/
+
+# ===== App logs =====
+logs/
+smart-attendnace-system/logs/
+
+# ===== Test assets (large images etc.) =====
+testpics/
+
+# ===== Env / secrets (if any) =====
+*.env
+.env.local
+smart-attendnace-system/target/classes/application.properties

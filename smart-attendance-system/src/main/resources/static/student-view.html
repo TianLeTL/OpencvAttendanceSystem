@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Smart Attendance System - Student Profile and Training Photos" />
+  <title>Student Profile · Smart Attendance System</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a'
+            },
+            accent: {
+              50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe',
+              400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 700: '#7e22ce'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f3f4f6', 200: '#e5e7eb',
+              300: '#d1d5db', 400: '#9ca3af', 500: '#6b7280', 600: '#4b5563',
+              700: '#374151', 800: '#1f2937', 900: '#111827'
+            }
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0,0,0,0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0,0,0,0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0,0,0,0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0,0,0,0.12)',
+            'brand': '0 4px 12px -2px rgba(59,130,246,0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0,0,0,0.05)'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-in-left': 'slideInLeft 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out',
+            'spin': 'spin 1s linear infinite',
+            'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideInLeft: { '0%': { transform: 'translateX(-100%)', opacity: 0 }, '100%': { transform: 'translateX(0)', opacity: 1 } },
+            scaleIn: { '0%': { transform: 'scale(0.95)', opacity: 0 }, '100%': { transform: 'scale(1)', opacity: 1 } },
+            spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
+            pulse: { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    .sidebar {
+      transition: transform .3s ease-in-out;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+    dialog[open] {
+      animation: scaleIn .2s ease-out;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    .photo-card {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .photo-card:hover .photo-overlay {
+      opacity: 1;
+    }
+
+    .photo-overlay {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen gradient-light">
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden"
+    aria-hidden="true"></div>
+
+  <aside id="sidebar"
+    class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50">
+    <div class="flex flex-col h-full">
+
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar"
+          class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          aria-label="Close sidebar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="students.html"
+          class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl"
+          aria-current="page">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="courses.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span>Courses</span>
+        </a>
+        <a href="sessions.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>Sessions</span>
+        </a>
+        <a href="mark-attendance.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html"
+            class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex items-center justify-between px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle"
+            class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Open sidebar">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <a href="students.html"
+            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Back to students">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </a>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900" id="studentName">Student Profile</h2>
+            <p class="text-sm text-gray-500"><span id="studentId">Loading...</span></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="replacePhotosBtn"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white text-sm font-semibold rounded-lg shadow-brand transition-all duration-200 hover:shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span class="hidden sm:inline">Replace All Photos</span><span class="sm:hidden">Replace</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-6 animate-fade-in">
+
+      <!-- Student Information Card -->
+      <section class="bg-white rounded-2xl border border-gray-200 shadow-soft p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Student Information</h3>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Full Name</label>
+            <p class="text-base font-semibold text-gray-900" id="infoName">—</p>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email</label>
+            <p class="text-base text-gray-700" id="infoEmail">—</p>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Phone</label>
+            <p class="text-base text-gray-700" id="infoPhone">—</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Training Photos Section -->
+      <section class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Training Photos</h3>
+            <p class="text-sm text-gray-500 mt-1">Face recognition training images (<span id="photoCount">0</span>
+              photos)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="selectAllBtn"
+              class="hidden px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+              Select All
+            </button>
+            <button id="deleteSelectedBtn"
+              class="hidden px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+              <span class="flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete (<span id="selectedCount">0</span>)
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Photo Grid -->
+        <div id="photoGrid" class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <!-- Loading skeleton -->
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden px-6 py-12">
+          <div class="text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h4 class="text-lg font-semibold text-gray-900 mb-2">No training photos yet</h4>
+            <p class="text-sm text-gray-500 mb-6">Upload face recognition training images to enable automated attendance
+            </p>
+            <button id="emptyReplaceBtn"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+              </svg>
+              Upload Photos
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mask Variant Photos Section -->
+      <section id="maskSection" class="hidden bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+          <h3 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+            <span>Synthetic Mask Variants</span>
+            <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+              <span id="maskPhotoCount">0</span> generated
+            </span>
+          </h3>
+          <p class="text-sm text-gray-500 mt-1">Automatically generated views used for mask-aware recognition</p>
+        </div>
+
+        <div id="maskPhotoGrid" class="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+          <div class="aspect-square rounded-lg skeleton"></div>
+        </div>
+
+        <div id="maskEmptyState" class="hidden px-6 py-10 text-sm text-gray-500 text-center">
+          Mask variants will appear here once training photos are uploaded.
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Replace Photos Modal -->
+  <dialog id="replaceModal" class="rounded-2xl bg-white p-0 w-full max-w-2xl shadow-soft-xl border border-gray-200">
+    <div class="p-6 border-b border-gray-100">
+      <h2 class="text-lg font-semibold text-gray-900">Replace All Training Photos</h2>
+      <p class="text-sm text-gray-600 mt-1">Upload new face images to replace all existing training data</p>
+      <p id="replaceError" class="hidden mt-2 text-sm text-red-600" role="alert" aria-live="assertive"></p>
+    </div>
+    <div class="p-6 space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Select New Training Photos</label>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="cameraCaptureBtn"
+            class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Start Camera Capture
+          </button>
+          <button type="button" id="uploadPhotosBtn"
+            class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+            </svg>
+            Upload Photos
+          </button>
+        </div>
+        <input id="faces" type="file" accept="image/png,image/jpeg" multiple class="hidden" />
+        <div id="thumbs" class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+        <p class="mt-2 text-xs text-gray-500">Capture 20 photos or upload existing images (PNG/JPEG, up to 5 MB each).
+          This will delete all existing training data and replace it with the new photos.</p>
+      </div>
+
+      <!-- Upload Progress -->
+      <div id="uploadProgressContainer" class="hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700" id="uploadProgressLabel">Processing...</span>
+          <span id="uploadProgressText" class="text-sm text-gray-600">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div id="uploadProgressBar"
+            class="bg-gradient-to-r from-brand-500 to-brand-600 h-2 rounded-full transition-all duration-300"
+            style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button type="button" id="cancelReplaceBtn"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
+        <button type="button" id="confirmReplaceBtn"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg id="replaceBtnSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+          <span id="replaceBtnText">Replace Photos</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Mask Confirmation Modal -->
+  <dialog id="maskConfirmModal" class="rounded-2xl bg-white p-0 w-full max-w-lg shadow-soft-xl border border-gray-200">
+    <div class="p-6 space-y-4">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Confirm Mask Status</h3>
+          <p id="maskConfirmSummary" class="text-sm text-gray-600 mt-1">We detected possible masks with low confidence.</p>
+        </div>
+        <button type="button" id="maskConfirmCloseBtn" class="text-gray-500 hover:text-gray-700 transition-colors" aria-label="Close mask confirmation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rounded-xl border border-dashed border-gray-200 p-3 bg-gray-50">
+        <img id="maskPreviewImage" src="" alt="Training photo preview" class="w-full rounded-lg object-cover max-h-64 bg-white" />
+        <p id="maskConfidenceText" class="mt-2 text-xs text-gray-500">Detector confidence: —</p>
+      </div>
+
+      <p class="text-sm text-gray-600">
+        Let us know if the student was actually wearing a mask in these uploads. Accurate labels improve recognition and mask augmentation.
+      </p>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <button type="button" id="maskConfirmNoBtn" class="mask-choice inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+          <span>No, not wearing a mask</span>
+        </button>
+        <button type="button" id="maskConfirmYesBtn" class="mask-choice inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors">
+          <span>Yes, wearing a mask</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <button type="button" id="maskConfirmSkipBtn" class="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
+          Skip for now
+        </button>
+        <p id="maskConfirmStatus" class="hidden text-sm text-gray-500">Updating mask status…</p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Camera Capture Modal -->
+  <dialog id="cameraModal" class="rounded-2xl bg-white p-0 w-full max-w-3xl shadow-soft-xl border border-gray-200">
+    <div class="p-6 border-b border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900">Capture Face Images</h3>
+      <p id="captureStatus" class="mt-1 text-sm text-gray-600">Click Start Capture to begin</p>
+      <p class="mt-1 text-xs text-gray-500">Position your face clearly in the frame. 20 photos will be captured
+        automatically at 0.25-second intervals.</p>
+    </div>
+    <div class="p-6 grid md:grid-cols-2 gap-4">
+      <div class="space-y-3">
+        <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+          <video id="cameraPreview" autoplay playsinline class="w-full h-full object-cover"></video>
+        </div>
+        <div class="flex items-center justify-between">
+          <button id="startCaptureBtn"
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg id="captureBtnSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
+            </svg>
+            <span id="captureBtnText">Start Capture</span>
+          </button>
+          <button id="cancelCaptureBtn"
+            class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
+        </div>
+      </div>
+      <div>
+        <div id="captureGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-96 overflow-y-auto"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Enhanced Toast -->
+  <div id="toast"
+    class="fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50 max-w-sm">
+    <div class="flex items-center gap-3">
+      <svg id="toastIcon" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+      <span id="toastMessage" class="text-sm font-medium"></span>
+    </div>
+  </div>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    (function enforceAdminOnlyPage() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(raw);
+        if ((user.role || '').toUpperCase() !== 'ADMIN') {
+          window.location.href = 'error.html';
+        }
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        window.location.href = 'index.html';
+      }
+    })();
+
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    (function enforceAdminOnlyPage() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(raw);
+        if ((user.role || '').toUpperCase() !== 'ADMIN') {
+          window.location.href = 'error.html';
+        }
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        window.location.href = 'index.html';
+      }
+    })();
+
+    function getLoggedInUser() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        handleUnauthorized();
+        return null;
+      }
+    }
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || 'ADMIN').toUpperCase();
+      const isAdmin = role === 'ADMIN';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    // Configuration
+    const APIBASE = 'api/students';
+    const MAXPHOTOS = 20;
+    const CAPTUREINTERVALMS = 250;
+    const MASK_CONFIDENCE_THRESHOLD = 0.95;
+    const MASK_AUTOCLEAR_FLOOR = 0.05;
+
+    let currentStudentId = null;
+    let studentData = null;
+    let photos = [];
+    let maskPhotos = [];
+    let selectedPhotoIds = new Set();
+    let cameraStream = null;
+    let capturedPhotos = [];
+    let pendingPhotoFiles = [];
+    const maskConfirmModal = document.getElementById('maskConfirmModal');
+    const maskPreviewImage = document.getElementById('maskPreviewImage');
+    const maskConfirmSummary = document.getElementById('maskConfirmSummary');
+    const maskConfidenceText = document.getElementById('maskConfidenceText');
+    const maskConfirmStatus = document.getElementById('maskConfirmStatus');
+    const maskConfirmYesBtn = document.getElementById('maskConfirmYesBtn');
+    const maskConfirmNoBtn = document.getElementById('maskConfirmNoBtn');
+    const maskConfirmSkipBtn = document.getElementById('maskConfirmSkipBtn');
+    const maskConfirmCloseBtn = document.getElementById('maskConfirmCloseBtn');
+    const maskChoiceButtons = document.querySelectorAll('.mask-choice');
+    const maskConfirmQueue = [];
+    let maskPromptActive = false;
+    let currentMaskPrompt = null;
+
+    // Enhanced toast
+    function toast(message, type = 'success') {
+      const t = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+
+      msg.textContent = message;
+      t.className = 'fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 z-50 max-w-sm';
+
+      if (type === 'success') {
+        t.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-green-600');
+      } else if (type === 'error') {
+        t.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-red-600');
+      } else if (type === 'warning') {
+        t.classList.add('bg-yellow-50', 'text-yellow-800', 'border', 'border-yellow-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>';
+        icon.classList.add('text-yellow-600');
+      } else {
+        t.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-blue-600');
+      }
+
+      t.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+      t.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        t.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+      }, 4000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function needsMaskConfirmation(photo) {
+      if (!photo || !photo.autoMaskSuggestion) return false;
+      const confidence = typeof photo.maskConfidence === 'number' ? photo.maskConfidence : Number(photo.maskConfidence || 0);
+      if (confidence < MASK_AUTOCLEAR_FLOOR) return false;
+      return confidence < MASK_CONFIDENCE_THRESHOLD;
+    }
+    function handleMaskConfirmations(studentId, newPhotos = []) {
+      if (!Array.isArray(newPhotos) || newPhotos.length === 0) return;
+      const uncertain = newPhotos.filter(needsMaskConfirmation);
+      if (!uncertain.length) return;
+      maskConfirmQueue.push({ studentId, photos: uncertain });
+      if (!maskPromptActive) {
+        showNextMaskPrompt();
+      }
+    }
+
+    function showNextMaskPrompt() {
+      if (maskConfirmQueue.length === 0) {
+        currentMaskPrompt = null;
+        maskPromptActive = false;
+        if (maskConfirmModal.open) {
+          maskConfirmModal.close();
+        }
+        return;
+      }
+      currentMaskPrompt = maskConfirmQueue.shift();
+      maskPromptActive = true;
+      const previewPhoto = currentMaskPrompt.photos[0];
+      const count = currentMaskPrompt.photos.length;
+      const confidence = typeof previewPhoto.maskConfidence === 'number'
+        ? previewPhoto.maskConfidence
+        : Number(previewPhoto.maskConfidence || 0);
+      maskConfirmSummary.textContent = count === 1
+        ? 'We detected a possible mask in this photo but confidence is low.'
+        : `We detected possible masks in ${count} photos but confidence is low.`;
+      maskConfidenceText.textContent = `Detector confidence: ${Math.round(confidence * 100)}%`;
+      maskPreviewImage.src = previewPhoto.imageData || 'https://dummyimage.com/480x480/f3f4f6/94a3b8&text=Photo';
+      maskPreviewImage.alt = 'Photo awaiting mask confirmation';
+      maskChoiceButtons.forEach(btn => btn.disabled = false);
+      maskConfirmStatus.classList.add('hidden');
+      maskConfirmModal.showModal();
+    }
+
+    function setMaskModalLoading(loading) {
+      maskChoiceButtons.forEach(btn => btn.disabled = loading);
+      if (loading) {
+        maskConfirmStatus.classList.remove('hidden');
+      } else {
+        maskConfirmStatus.classList.add('hidden');
+      }
+    }
+
+    async function submitMaskDecision(hasRealMask) {
+      if (!currentMaskPrompt) {
+        closeMaskPrompt(true);
+        return;
+      }
+      try {
+        setMaskModalLoading(true);
+        for (const photo of currentMaskPrompt.photos) {
+          await updatePhotoMaskStatus(currentMaskPrompt.studentId, photo.id, hasRealMask);
+        }
+        toast(hasRealMask ? 'Marked selected photos as masked' : 'Marked selected photos as unmasked', 'success');
+        closeMaskPrompt();
+      } catch (err) {
+        console.error('Failed to update mask status', err);
+        toast(err.message || 'Failed to update mask status', 'error');
+        setMaskModalLoading(false);
+      }
+    }
+
+    function closeMaskPrompt(skip = false) {
+      if (maskConfirmModal.open) {
+        maskConfirmModal.close();
+      }
+      currentMaskPrompt = null;
+      maskPromptActive = false;
+      if (!skip && maskConfirmQueue.length > 0) {
+        showNextMaskPrompt();
+      } else if (skip) {
+        maskConfirmQueue.length = 0;
+      }
+    }
+
+    async function updatePhotoMaskStatus(studentId, photoId, hasRealMask) {
+      const resp = await authFetch(`${APIBASE}/${encodeURIComponent(studentId)}/photos/${encodeURIComponent(photoId)}/mask-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hasRealMask })
+      });
+      if (resp.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      if (!resp.ok) {
+        let body = null; try { body = await resp.json(); } catch {}
+        throw new Error(body?.message || 'Failed to update mask status');
+      }
+      return resp.json().catch(() => ({}));
+    }
+
+    // Get student ID from URL
+    function getStudentIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    // Load student details
+    async function loadStudentDetails() {
+      try {
+        const resp = await authFetch(`${APIBASE}/${encodeURIComponent(currentStudentId)}/detail`);
+        if (!resp.ok) throw new Error('Failed to load student');
+
+        const data = await resp.json();
+        studentData = data.success ? data.data : data;
+
+        // Update UI
+        document.getElementById('studentName').textContent = studentData.fullName || 'Unknown';
+        document.getElementById('studentId').textContent = studentData.studentId || '';
+        document.getElementById('infoName').textContent = studentData.fullName || '—';
+        document.getElementById('infoEmail').textContent = studentData.email || '—';
+        document.getElementById('infoPhone').textContent = studentData.phoneNumber || '—';
+
+        photos = Array.isArray(studentData.photos) ? studentData.photos : [];
+        maskPhotos = Array.isArray(studentData.maskPhotos) ? studentData.maskPhotos : [];
+        renderPhotoGrid();
+        renderMaskGrid();
+
+      } catch (err) {
+        console.error('Error loading student:', err);
+        toast('Failed to load student details', 'error');
+      }
+    }
+
+    // Render photo grid
+    function renderPhotoGrid() {
+      const grid = document.getElementById('photoGrid');
+      const emptyState = document.getElementById('emptyState');
+      const photoCount = document.getElementById('photoCount');
+
+      photoCount.textContent = photos.length;
+
+      if (photos.length === 0) {
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        updateSelectionUI();
+        return;
+      }
+
+      grid.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      grid.innerHTML = photos.map(photo => {
+        const isSelected = selectedPhotoIds.has(photo.id);
+        const uploadDate = photo.uploadDate ? new Date(photo.uploadDate).toLocaleDateString('en-GB', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        }) : 'Unknown';
+        const maskBadge = photo.hasRealMask
+          ? `<span class="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200">
+                Real Mask
+             </span>`
+          : '';
+
+        return `
+          <div class="photo-card relative bg-white rounded-lg border-2 ${isSelected ? 'border-brand-500' : 'border-gray-200'} overflow-hidden shadow-soft">
+            <div class="aspect-square bg-gray-100">
+              <img src="${photo.imageData}" alt="Training photo" class="w-full h-full object-cover" />
+            </div>
+            ${maskBadge}
+            <div class="photo-overlay absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-between p-3">
+              <div class="flex items-start justify-between">
+                <input type="checkbox" 
+                  class="photo-checkbox w-5 h-5 rounded border-2 border-white bg-white/20 checked:bg-brand-500 checked:border-brand-500 cursor-pointer transition-all"
+                  data-photo-id="${photo.id}" ${isSelected ? 'checked' : ''} />
+                <button class="delete-single-btn p-1.5 bg-red-500/80 hover:bg-red-600 rounded-lg text-white transition-colors" data-photo-id="${photo.id}">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+              <div class="text-white">
+                <p class="text-xs font-medium truncate">${escapeHtml(photo.filename || 'image.jpg')}</p>
+                <p class="text-xs opacity-80">${uploadDate}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Attach event listeners
+      grid.querySelectorAll('.photo-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const photoId = parseInt(e.target.dataset.photoId);
+          if (e.target.checked) {
+            selectedPhotoIds.add(photoId);
+          } else {
+            selectedPhotoIds.delete(photoId);
+          }
+          updateSelectionUI();
+          renderPhotoGrid();
+        });
+      });
+
+      grid.querySelectorAll('.delete-single-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const photoId = parseInt(btn.dataset.photoId);
+          if (confirm('Delete this training photo?')) {
+            await deletePhotos([photoId]);
+          }
+        });
+      });
+
+      updateSelectionUI();
+    }
+
+    function renderMaskGrid() {
+      const maskSection = document.getElementById('maskSection');
+      const grid = document.getElementById('maskPhotoGrid');
+      const emptyState = document.getElementById('maskEmptyState');
+      const maskCountEl = document.getElementById('maskPhotoCount');
+
+      const count = Array.isArray(maskPhotos) ? maskPhotos.length : 0;
+      maskCountEl.textContent = count;
+
+      if (count === 0) {
+        maskSection.classList.add('hidden');
+        grid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      maskSection.classList.remove('hidden');
+      grid.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+
+      grid.innerHTML = maskPhotos.map(photo => {
+        const uploadDate = photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('en-GB', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        }) : 'Unknown';
+        const sourceId = photo.sourceTrainingId ? `Source #${photo.sourceTrainingId}` : 'Derived';
+        return `
+          <div class="photo-card relative bg-white rounded-lg border border-gray-200 overflow-hidden shadow-soft">
+            <div class="aspect-square bg-gray-100">
+              <img src="${photo.imageData}" alt="Mask variant" class="w-full h-full object-cover" />
+            </div>
+            <div class="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+              Masked
+            </div>
+            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-3">
+              <p class="text-xs font-medium text-white truncate">${escapeHtml(photo.filename || 'mask_variant.jpg')}</p>
+              <p class="text-xs text-white/80">${uploadDate}</p>
+              <p class="text-[11px] text-white/70 mt-1">${escapeHtml(sourceId)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update selection UI
+    function updateSelectionUI() {
+      const selectAllBtn = document.getElementById('selectAllBtn');
+      const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+      const selectedCount = document.getElementById('selectedCount');
+
+      if (photos.length === 0) {
+        selectAllBtn.classList.add('hidden');
+        deleteSelectedBtn.classList.add('hidden');
+        return;
+      }
+
+      selectAllBtn.classList.remove('hidden');
+
+      if (selectedPhotoIds.size > 0) {
+        deleteSelectedBtn.classList.remove('hidden');
+        selectedCount.textContent = selectedPhotoIds.size;
+        selectAllBtn.textContent = selectedPhotoIds.size === photos.length ? 'Deselect All' : 'Select All';
+      } else {
+        deleteSelectedBtn.classList.add('hidden');
+        selectAllBtn.textContent = 'Select All';
+      }
+    }
+
+    // Select/Deselect all
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+      if (selectedPhotoIds.size === photos.length) {
+        selectedPhotoIds.clear();
+      } else {
+        selectedPhotoIds = new Set(photos.map(p => p.id));
+      }
+      renderPhotoGrid();
+    });
+
+    // Delete selected
+    document.getElementById('deleteSelectedBtn').addEventListener('click', async () => {
+      if (selectedPhotoIds.size === 0) return;
+      if (!confirm(`Delete ${selectedPhotoIds.size} selected photo${selectedPhotoIds.size > 1 ? 's' : ''}?`)) return;
+      await deletePhotos(Array.from(selectedPhotoIds));
+    });
+
+    // Delete photos
+    async function deletePhotos(photoIds) {
+      try {
+        const deletePromises = photoIds.map(id => authFetch(
+          `${APIBASE}/${encodeURIComponent(currentStudentId)}/photos/${id}`,
+          { method: 'DELETE' }
+        ).then(resp => {
+          if (!resp.ok) {
+            throw new Error('Failed to delete photo');
+          }
+        }));
+
+        await Promise.all(deletePromises);
+        toast(`Deleted ${photoIds.length} photo${photoIds.length > 1 ? 's' : ''}`, 'success');
+        selectedPhotoIds.clear();
+        await loadStudentDetails();
+      } catch (err) {
+        console.error('Delete error:', err);
+        toast('Failed to delete photos', 'error');
+      }
+    }
+
+    // Get existing photo IDs
+    async function getStudentPhotoIds() {
+      try {
+        const resp = await authFetch(`${APIBASE}/${encodeURIComponent(currentStudentId)}/detail`);
+        if (!resp.ok) return [];
+        const data = await resp.json();
+        const student = data.success ? data.data : data;
+        return Array.isArray(student.photos) ? student.photos.map(p => p.id).filter(Boolean) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    // Delete single photo
+    async function deletePhoto(photoId) {
+      const resp = await authFetch(`${APIBASE}/${encodeURIComponent(currentStudentId)}/photos/${photoId}`, { method: 'DELETE' });
+      if (!resp.ok) throw new Error('Failed to delete photo');
+    }
+
+    // Delete all photos
+    async function deleteAllStudentPhotos(onProgress) {
+      const photoIds = await getStudentPhotoIds();
+      if (photoIds.length === 0) {
+        if (onProgress) onProgress(0, 0);
+        return;
+      }
+
+      for (let i = 0; i < photoIds.length; i++) {
+        await deletePhoto(photoIds[i]);
+        if (onProgress) onProgress(i + 1, photoIds.length);
+      }
+    }
+
+    // Add new photos
+    async function addPhotosToStudent(photos = []) {
+      const formData = new FormData();
+      photos.forEach(f => formData.append('photos', f));
+
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const progressLabel = document.getElementById('uploadProgressLabel');
+
+      progressContainer.classList.remove('hidden');
+      progressLabel.textContent = 'Uploading new photos...';
+
+      const xhr = new XMLHttpRequest();
+
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = `${percentComplete}%`;
+            progressText.textContent = `${percentComplete}%`;
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              resolve(result?.data || result || {});
+            } catch {
+              resolve({});
+            }
+          } else if (xhr.status === 401) {
+            handleUnauthorized();
+            reject(new Error('Unauthorized'));
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error?.message || `HTTP ${xhr.status}`));
+            } catch {
+              reject(new Error(`HTTP ${xhr.status} ${xhr.statusText}`));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+          reject(new Error('Network error'));
+        });
+
+        const token = getAuthToken();
+        if (!token) {
+          handleUnauthorized();
+          reject(new Error('Missing authentication token'));
+          return;
+        }
+
+        xhr.open('POST', `${APIBASE}/${encodeURIComponent(currentStudentId)}/photos`);
+        xhr.setRequestHeader('Authorization', `Basic ${token}`);
+        xhr.send(formData);
+      });
+    }
+
+    // Replace photos modal
+    function openReplaceModal() {
+      const dlg = document.getElementById('replaceModal');
+      const err = document.getElementById('replaceError');
+      err.classList.add('hidden');
+      err.textContent = '';
+
+      capturedPhotos = [];
+      pendingPhotoFiles = [];
+      updateThumbs([]);
+      document.getElementById('uploadProgressContainer').classList.add('hidden');
+      dlg.showModal();
+    }
+
+    function closeReplaceModal() {
+      document.getElementById('replaceModal').close();
+    }
+
+    function updateThumbs(files) {
+      const wrap = document.getElementById('thumbs');
+      if (!files || files.length === 0) { wrap.innerHTML = ''; return; }
+      const frags = [];
+      files.forEach((f, idx) => {
+        const url = URL.createObjectURL(f);
+        const el = document.createElement('div');
+        el.className = 'relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 group';
+        el.innerHTML = `
+          <img src="${url}" class="w-full h-full object-cover transition-transform group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-medium text-gray-700">${idx + 1}</div>
+        `;
+        frags.push(el);
+      });
+      wrap.replaceChildren(...frags);
+    }
+
+    // Upload photos button
+    maskConfirmYesBtn.addEventListener('click', () => submitMaskDecision(true));
+    maskConfirmNoBtn.addEventListener('click', () => submitMaskDecision(false));
+    maskConfirmSkipBtn.addEventListener('click', () => closeMaskPrompt(true));
+    maskConfirmCloseBtn.addEventListener('click', () => closeMaskPrompt(true));
+    maskConfirmModal.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeMaskPrompt(true);
+    });
+
+    document.getElementById('uploadPhotosBtn').addEventListener('click', () => {
+      document.getElementById('faces').click();
+    });
+
+    document.getElementById('faces').addEventListener('change', (e) => {
+      const all = Array.from(e.target.files || []);
+      if (all.length === 0) return;
+      const accepted = [];
+      const rejected = [];
+      for (const f of all) {
+        const typeOk = /image\/(png|jpeg)/i.test(f.type);
+        const sizeOk = f.size <= 5 * 1024 * 1024;
+        if (typeOk && sizeOk) accepted.push(f); else rejected.push(f.name);
+      }
+      if (rejected.length) {
+        const sample = rejected.slice(0, 3).join(', ');
+        const suffix = rejected.length > 3 ? '…' : '';
+        toast(`Skipped ${rejected.length} file${rejected.length === 1 ? '' : 's'} (invalid): ${sample}${suffix}`, 'warning');
+      }
+      if (!accepted.length) { e.target.value = ''; return; }
+      if (accepted.length > MAXPHOTOS) {
+        toast(`Only the first ${MAXPHOTOS} photos will be used.`, 'info');
+      }
+      pendingPhotoFiles = accepted.slice(0, MAXPHOTOS);
+      updateThumbs(pendingPhotoFiles);
+      toast(`${pendingPhotoFiles.length} photo${pendingPhotoFiles.length === 1 ? '' : 's'} selected`, 'success');
+    });
+
+    // Camera capture
+    async function startCamera() {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      const video = document.getElementById('cameraPreview');
+      video.srcObject = cameraStream;
+      await video.play().catch(() => { });
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+    }
+
+    async function openCameraModal() {
+      const dlg = document.getElementById('cameraModal');
+      document.getElementById('captureStatus').textContent = 'Click Start Capture to begin';
+      document.getElementById('startCaptureBtn').disabled = false;
+      document.getElementById('captureGrid').innerHTML = '';
+      dlg.showModal();
+      try {
+        await startCamera();
+        toast('Camera ready', 'success');
+      } catch (err) {
+        toast('Failed to access camera', 'error');
+        dlg.close();
+      }
+    }
+
+    function closeCameraModal() {
+      stopCamera();
+      document.getElementById('cameraModal').close();
+    }
+
+    async function startPhotoCapture() {
+      const video = document.getElementById('cameraPreview');
+      const grid = document.getElementById('captureGrid');
+      const status = document.getElementById('captureStatus');
+      const startBtn = document.getElementById('startCaptureBtn');
+      const spinner = document.getElementById('captureBtnSpinner');
+      const btnText = document.getElementById('captureBtnText');
+
+      capturedPhotos = [];
+      grid.innerHTML = '';
+      startBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Capturing...';
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const captureOne = () => new Promise(resolve => {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        if (!w || !h) { resolve(null); return; }
+        const size = Math.min(w, h);
+        const sx = (w - size) / 2;
+        const sy = (h - size) / 2;
+        canvas.width = 320; canvas.height = 320;
+        ctx.drawImage(video, sx, sy, size, size, 0, 0, 320, 320);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
+      });
+
+      for (let i = 0; i < MAXPHOTOS; i++) {
+        const blob = await captureOne();
+        if (blob) {
+          capturedPhotos.push(blob);
+          const url = URL.createObjectURL(blob);
+          const cell = document.createElement('div');
+          cell.className = 'relative aspect-square rounded-lg overflow-hidden bg-gray-100 animate-scale-in';
+          cell.innerHTML = `
+            <img src="${url}" class="w-full h-full object-cover" />
+            <div class="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-xs font-medium text-gray-700">${i + 1}</div>
+          `;
+          grid.appendChild(cell);
+          status.textContent = `Captured ${capturedPhotos.length}/${MAXPHOTOS}`;
+        }
+        await new Promise(r => setTimeout(r, CAPTUREINTERVALMS));
+      }
+
+      status.textContent = 'Capture complete! Close to use these images.';
+      startBtn.disabled = false;
+      spinner.classList.add('hidden');
+      btnText.textContent = 'Start Capture';
+      toast('20 photos captured successfully!', 'success');
+    }
+
+    document.getElementById('cameraCaptureBtn').addEventListener('click', openCameraModal);
+    document.getElementById('startCaptureBtn').addEventListener('click', startPhotoCapture);
+    document.getElementById('cancelCaptureBtn').addEventListener('click', () => {
+      if (capturedPhotos.length) {
+        pendingPhotoFiles = capturedPhotos.map((blob, idx) => new File([blob], `capture_${idx + 1}.jpg`, { type: 'image/jpeg' }));
+        updateThumbs(pendingPhotoFiles);
+        toast(`${capturedPhotos.length} photos ready`, 'success');
+      }
+      closeCameraModal();
+    });
+
+    // Confirm replace
+    document.getElementById('confirmReplaceBtn').addEventListener('click', async () => {
+      if (pendingPhotoFiles.length === 0) {
+        document.getElementById('replaceError').textContent = 'Please select photos to upload.';
+        document.getElementById('replaceError').classList.remove('hidden');
+        return;
+      }
+
+      const btn = document.getElementById('confirmReplaceBtn');
+      const spinner = document.getElementById('replaceBtnSpinner');
+      const btnText = document.getElementById('replaceBtnText');
+      const cancelBtn = document.getElementById('cancelReplaceBtn');
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const progressLabel = document.getElementById('uploadProgressLabel');
+
+      btn.disabled = true;
+      cancelBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Replacing...';
+
+      try {
+        progressContainer.classList.remove('hidden');
+
+        // Step 1: Delete all existing photos
+        progressLabel.textContent = 'Removing old photos...';
+        progressBar.style.width = '10%';
+        progressText.textContent = '10%';
+
+        await deleteAllStudentPhotos((completed, total) => {
+          const deleteProgress = 10 + (completed / total) * 30;
+          progressBar.style.width = `${deleteProgress}%`;
+          progressText.textContent = `${Math.round(deleteProgress)}%`;
+          progressLabel.textContent = `Removing old photos (${completed}/${total})...`;
+        });
+
+        // Step 2: Upload new photos
+        progressLabel.textContent = 'Uploading new photos...';
+        progressBar.style.width = '40%';
+        progressText.textContent = '40%';
+
+        const uploadResult = await addPhotosToStudent(pendingPhotoFiles);
+        handleMaskConfirmations(currentStudentId, uploadResult?.photos || []);
+
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+
+        setTimeout(() => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+        }, 500);
+
+        toast(`Successfully replaced with ${pendingPhotoFiles.length} new photo${pendingPhotoFiles.length === 1 ? '' : 's'}`, 'success');
+        closeReplaceModal();
+        await loadStudentDetails();
+
+      } catch (err) {
+        console.error('Replace error:', err);
+        document.getElementById('replaceError').textContent = err.message || 'Failed to replace photos';
+        document.getElementById('replaceError').classList.remove('hidden');
+        toast('Failed to replace photos', 'error');
+      } finally {
+        btn.disabled = false;
+        cancelBtn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.textContent = 'Replace Photos';
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+      }
+    });
+
+    // Modal controls
+    document.getElementById('cancelReplaceBtn').addEventListener('click', closeReplaceModal);
+    document.getElementById('replacePhotosBtn').addEventListener('click', openReplaceModal);
+    document.getElementById('emptyReplaceBtn').addEventListener('click', openReplaceModal);
+
+    // Sidebar
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      sidebar.classList.add('open'); overlay.classList.remove('hidden');
+    });
+    document.getElementById('closeSidebar').addEventListener('click', () => {
+      sidebar.classList.remove('open'); overlay.classList.add('hidden');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open'); overlay.classList.add('hidden');
+    });
+
+    // Logout
+    setupLogoutModal(async () => {
+      try {
+        await authFetch('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error('Logout error', error);
+      } finally {
+        handleUnauthorized();
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('replaceModal').open) closeReplaceModal();
+        if (document.getElementById('cameraModal').open) closeCameraModal();
+      }
+    });
+
+    // Initial load
+    window.addEventListener('load', async () => {
+      const user = getLoggedInUser();
+      if (!user) return;
+      initialiseUserInterface(user);
+      if ((user.role || '').toUpperCase() !== 'ADMIN') {
+        window.location.href = 'error.html';
+        return;
+      }
+
+      currentStudentId = getStudentIdFromUrl();
+      if (!currentStudentId) {
+        toast('Invalid student ID', 'error');
+        setTimeout(() => window.location.href = 'students.html', 2000);
+        return;
+      }
+      await loadStudentDetails();
+    });
+  </script>
+</body>
+
+</html>

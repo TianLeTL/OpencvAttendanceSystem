@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Smart Attendance System - Manage students directory and face photos" />
+  <title>Students · Smart Attendance System</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a'
+            },
+            accent: {
+              50: '#faf5ff', 100: '#f3e8ff', 200: '#e9d5ff', 300: '#d8b4fe',
+              400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 700: '#7e22ce'
+            },
+            gray: {
+              25: '#fcfcfd', 50: '#f9fafb', 100: '#f3f4f6', 200: '#e5e7eb',
+              300: '#d1d5db', 400: '#9ca3af', 500: '#6b7280', 600: '#4b5563',
+              700: '#374151', 800: '#1f2937', 900: '#111827'
+            }
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0,0,0,0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0,0,0,0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0,0,0,0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0,0,0,0.12)',
+            'brand': '0 4px 12px -2px rgba(59,130,246,0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0,0,0,0.05)'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-in-left': 'slideInLeft 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out',
+            'spin': 'spin 1s linear infinite',
+            'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideInLeft: { '0%': { transform: 'translateX(-100%)', opacity: 0 }, '100%': { transform: 'translateX(0)', opacity: 1 } },
+            scaleIn: { '0%': { transform: 'scale(0.95)', opacity: 0 }, '100%': { transform: 'scale(1)', opacity: 1 } },
+            spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
+            pulse: { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+    .nav-link { transition: all 0.2s ease; }
+    .nav-link:hover { transform: translateX(4px); }
+    .nav-link.active { background: linear-gradient(to right, #eff6ff, #f3f4f6); border-left: 3px solid #3b82f6; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f3f4f6; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    .sidebar { transition: transform .3s ease-in-out; }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } }
+    dialog[open] { animation: scaleIn .2s ease-out; }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+.progress-bar {
+  transition: width 0.3s ease-in-out;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-backdrop[open] {
+  display: flex;
+}
+
+.modal-panel {
+  width: min(460px, 92vw);
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  animation: scaleIn 0.2s ease-out;
+}
+
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-body {
+  padding: 16px 24px 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 0 24px 20px;
+}
+
+.delete-modal-header{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:24px;
+  background:linear-gradient(135deg,rgba(248,113,113,0.12) 0%,rgba(248,113,113,0.04) 100%);
+  border-bottom:1px solid rgba(248,113,113,0.2);
+}
+.delete-modal-icon{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  background:rgba(248,113,113,0.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#dc2626;
+  box-shadow:0 10px 25px rgba(248,113,113,0.18);
+}
+.delete-modal-icon svg{
+  width:26px;
+  height:26px;
+}
+.delete-modal-title{
+  margin:0;
+  font-size:1.1rem;
+  font-weight:600;
+  color:#111827;
+}
+.delete-modal-subtitle{
+  margin-top:4px;
+  font-size:0.85rem;
+  color:#6b7280;
+}
+.delete-modal-body{
+  padding:22px 24px 0;
+  display:grid;
+  gap:16px;
+}
+.delete-modal-message{
+  font-size:0.95rem;
+  color:#1f2937;
+  line-height:1.5;
+}
+.delete-warning-box{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:14px 16px;
+  border-radius:14px;
+  background:#fef2f2;
+  border:1px solid rgba(248,113,113,0.35);
+  color:#b91c1c;
+  font-size:0.9rem;
+  line-height:1.4;
+}
+.delete-warning-box svg{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+}
+.delete-modal-actions{
+  padding:20px 24px 24px;
+}
+.delete-cancel-btn{
+  padding:10px 18px;
+  border-radius:12px;
+  border:1px solid #d1d5db;
+  background:#ffffff;
+  color:#1f2937;
+  font-weight:600;
+  font-size:0.92rem;
+  transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.delete-cancel-btn:hover{
+  background:#f3f4f6;
+  border-color:#cbd5f0;
+}
+.delete-confirm-btn{
+  padding:10px 18px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#f87171 0%,#dc2626 100%);
+  color:#fff;
+  font-weight:600;
+  font-size:0.92rem;
+  border:none;
+  box-shadow:0 14px 30px rgba(220,38,38,0.25);
+  transition:transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.delete-confirm-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 16px 32px rgba(220,38,38,0.3);
+  filter:brightness(1.03);
+}
+.delete-confirm-btn:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+  box-shadow:none;
+  transform:none;
+}
+.delete-highlight{
+  font-weight:600;
+  color:#111827;
+}
+.delete-id-tag{
+  font-weight:500;
+  color:#6b7280;
+  margin-left:6px;
+}
+  </style>
+</head>
+
+<body class="min-h-screen gradient-light">
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden" aria-hidden="true"></div>
+
+  <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50">
+    <div class="flex flex-col h-full">
+
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar" class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors" aria-label="Close sidebar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="students.html" data-role="admin-only" class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl" aria-current="page">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <span>Students</span>
+        </a>
+        <a href="courses.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span>Courses</span>
+        </a>
+        <a href="sessions.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>Sessions</span>
+        </a>
+        <a href="mark-attendance.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span>Mark Attendance</span>
+        </a>
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex flex-wrap items-center justify-between gap-4 px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Open sidebar">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Students</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Manage the student directory and face photos</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <button id="importBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
+            <span>Import Template (.xlsx)</span>
+          </button>
+          <button id="addBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white text-sm font-semibold rounded-lg shadow-brand transition-all duration-200 hover:shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            <span class="hidden sm:inline">Add Student</span><span class="sm:hidden">Add</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-6 animate-fade-in">
+
+      <section class="bg-white rounded-2xl border border-gray-200 shadow-soft p-4 md:p-6">
+        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div class="w-full md:w-80">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.3-4.3M10 18a8 8 0 110-16 8 8 0 010 16z"/></svg>
+              </div>
+              <input type="search" id="searchInput" class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="Search by ID, name, phone..." autocomplete="off" />
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500">Total</span>
+            <span id="totalCountBadge" class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">0</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Photo</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors" data-sort="studentId">
+                  <div class="flex items-center gap-1">
+                    Student ID
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                  </div>
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors" data-sort="fullName">
+                  <div class="flex items-center gap-1">
+                    Name
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                  </div>
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors" data-sort="phoneNumber">
+                  <div class="flex items-center gap-1">
+                    Phone
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                  </div>
+                </th>
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Photos</th>
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody" class="divide-y divide-gray-100">
+              <!-- Skeleton loading state -->
+            </tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="px-6 py-12 hidden">
+          <div class="text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No students yet</h3>
+            <p class="text-sm text-gray-500 mb-6">Click Add Student to begin</p>
+            <button id="emptyAddBtn" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              Create Student
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Add/Edit Student Modal -->
+  <dialog id="studentModal" class="rounded-2xl bg-white p-0 w-full max-w-2xl shadow-soft-xl border border-gray-200">
+    <div class="p-6 border-b border-gray-100">
+      <h2 id="dlgTitle" class="text-lg font-semibold text-gray-900">Add Student</h2>
+      <p id="formError" class="hidden mt-2 text-sm text-red-600" role="alert" aria-live="assertive"></p>
+    </div>
+    <form id="studentForm" class="p-6 space-y-5" novalidate>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label for="sid" class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+          <div class="relative">
+            <input id="sid" name="sid" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="e.g. 01234567" required />
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 hidden" id="sidValidIcon">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+          </div>
+          <p id="sidError" class="hidden mt-1 text-xs text-red-600"></p>
+        </div>
+        <div>
+          <label for="sname" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input id="sname" name="sname" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="Full name" required />
+          <p id="snameError" class="hidden mt-1 text-xs text-red-600"></p>
+        </div>
+        <div>
+          <label for="semail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input id="semail" name="semail" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="name@smu.edu.sg" />
+          <p id="semailError" class="hidden mt-1 text-xs text-red-600"></p>
+        </div>
+        <div>
+          <label for="sphone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <input id="sphone" name="sphone" type="tel" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="91234567" />
+          <p id="sphoneError" class="hidden mt-1 text-xs text-red-600"></p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <span id="photoSectionLabel">Add New Face Images</span>
+          <span id="photoReplaceNotice" class="hidden text-xs text-amber-600 ml-2">(Will replace existing photos)</span>
+        </label>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="cameraCaptureBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Start Camera Capture
+          </button>
+          <button type="button" id="uploadPhotosBtn" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
+            Upload Photos
+          </button>
+        </div>
+        <input id="faces" name="faces" type="file" accept="image/png,image/jpeg" multiple class="hidden" aria-describedby="photoHelp" />
+        <div id="thumbs" class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" role="img" aria-label="Preview of selected images"></div>
+        <p id="photoHelp" class="mt-2 text-xs text-gray-500">Capture 20 photos with the camera or upload existing face images (PNG/JPEG, up to 5 MB each). When updating, new photos will replace all existing training data.</p>
+      </div>
+
+      <!-- Upload Progress Bar -->
+      <div id="uploadProgressContainer" class="hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700" id="uploadProgressLabel">Processing...</span>
+          <span id="uploadProgressText" class="text-sm text-gray-600">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div id="uploadProgressBar" class="progress-bar bg-gradient-to-r from-brand-500 to-brand-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button type="button" id="cancelBtn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Cancel</button>
+        <button type="submit" id="saveBtn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg id="saveBtnSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="saveBtnText">Save</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Mask Confirmation Modal -->
+  <dialog id="maskConfirmModal" class="rounded-2xl bg-white p-0 w-full max-w-lg shadow-soft-xl border border-gray-200">
+    <div class="p-6 space-y-4">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Confirm Mask Status</h3>
+          <p id="maskConfirmSummary" class="text-sm text-gray-600 mt-1">We detected a possible mask, but confidence is low.</p>
+        </div>
+        <button type="button" id="maskConfirmCloseBtn" class="text-gray-500 hover:text-gray-700 transition-colors" aria-label="Close mask confirmation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rounded-xl border border-dashed border-gray-200 p-3 bg-gray-50">
+        <img id="maskPreviewImage" src="" alt="Training photo preview" class="w-full rounded-lg object-cover max-h-64 bg-white" />
+        <p id="maskConfidenceText" class="mt-2 text-xs text-gray-500">Detector confidence: —</p>
+      </div>
+
+      <p class="text-sm text-gray-600">
+        Please let us know if the student was actually wearing a mask in these photos so we can store the right training data.
+      </p>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <button type="button" id="maskConfirmNoBtn" class="mask-choice inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+          <span>No, they are not wearing a mask</span>
+        </button>
+        <button type="button" id="maskConfirmYesBtn" class="mask-choice inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors">
+          <span>Yes, they are wearing a mask</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <button type="button" id="maskConfirmSkipBtn" class="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
+          I'll review this later
+        </button>
+        <p id="maskConfirmStatus" class="hidden text-sm text-gray-500">Updating mask status…</p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteConfirmModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalMessage">
+    <div class="modal-panel">
+      <div class="delete-modal-header">
+        <div class="delete-modal-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 9v3m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 5c-.77-1.333-2.694-1.333-3.464 0L4.34 17c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 id="deleteModalTitle" class="delete-modal-title">Confirm Deletion</h3>
+          <p id="deleteModalSubtitle" class="delete-modal-subtitle">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-body delete-modal-body">
+        <p id="deleteModalMessage" class="delete-modal-message">Are you sure you want to delete this student?</p>
+        <div class="delete-warning-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
+          </svg>
+          <span>All training images and attendance records will be permanently removed.</span>
+        </div>
+      </div>
+      <div class="modal-actions delete-modal-actions">
+        <button type="button" id="cancelDeleteBtn" class="delete-cancel-btn">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="inline-flex items-center gap-2 delete-confirm-btn">
+          <svg id="deleteBtnSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="deleteBtnText">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera Capture Modal -->
+  <dialog id="cameraModal" class="rounded-2xl bg-white p-0 w-full max-w-3xl shadow-soft-xl border border-gray-200">
+    <div class="p-6 border-b border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900">Capture Face Images</h3>
+      <p id="captureStatus" class="mt-1 text-sm text-gray-600">Click Start Capture to begin</p>
+      <p id="cameraInstructions" class="mt-1 text-xs text-gray-500">Position your face clearly in the frame. 20 photos will be captured automatically at 0.25-second intervals.</p>
+    </div>
+    <div class="p-6 grid md:grid-cols-2 gap-4">
+      <div class="space-y-3">
+        <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+          <video id="cameraPreview" autoplay playsinline class="w-full h-full object-cover"></video>
+        </div>
+        <div class="flex items-center justify-between">
+          <button id="startCaptureBtn" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg id="captureBtnSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span id="captureBtnText">Start Capture</span>
+          </button>
+          <button id="cancelCaptureBtn" class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Close</button>
+        </div>
+      </div>
+      <div>
+        <div id="captureGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-96 overflow-y-auto"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Enhanced Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50 max-w-sm">
+    <div class="flex items-center gap-3">
+      <svg id="toastIcon" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+      <span id="toastMessage" class="text-sm font-medium"></span>
+    </div>
+  </div>
+
+  <input type="file" id="csvInput" accept=".csv,.xlsx,.xls,.xlsm,.xlsb" class="hidden" />
+
+  <!-- Import Guidance Modal -->
+  <div id="importModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-gray-900/50 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-soft-xl border border-gray-200">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Import Student Template</h3>
+          <p class="text-sm text-gray-500 mt-1">Use the column order shown below.</p>
+        </div>
+        <button id="closeImportModal" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg" aria-label="Close template modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-left">
+              <tr>
+                <th class="px-4 py-2 font-semibold text-gray-700 border-r border-gray-200">Student ID</th>
+                <th class="px-4 py-2 font-semibold text-gray-700 border-r border-gray-200">Full Name</th>
+                <th class="px-4 py-2 font-semibold text-gray-700 border-r border-gray-200">Email</th>
+                <th class="px-4 py-2 font-semibold text-gray-700">Phone Number</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="text-sm text-gray-600 space-y-2">
+          <p>• Use <code>.csv</code> or Excel files (<code>.xlsx/.xls/.xlsm/.xlsb</code>).</p>
+          <p>• Columns must appear exactly as shown above.</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        <div class="flex items-center gap-3 ml-auto">
+          <button id="importModalCancel" class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          <button id="importModalConfirm" class="px-4 py-2 text-sm font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700">Select file…</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="logout-modal.js"></script>
+
+  <script>
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authRequest(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    (function enforceAdminOnlyPage() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(raw);
+        if ((user.role || '').toUpperCase() !== 'ADMIN') {
+          window.location.href = 'error.html';
+        }
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        window.location.href = 'index.html';
+      }
+    })();
+
+    function getLoggedInUser() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        handleUnauthorized();
+        return null;
+      }
+    }
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || 'ADMIN').toUpperCase();
+      const isAdmin = role === 'ADMIN';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    // Configuration
+    const APIBASE = 'api/students';
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+    const idRe = /^0\d{7}$/;
+    const phoneRe = /^[0-9()\-+\s]{0,20}$/;
+    const MAXPHOTOS = 20;
+    const CAPTUREINTERVALMS = 250;
+    const MASK_CONFIDENCE_THRESHOLD = 0.95;
+    const MASK_AUTOCLEAR_FLOOR = 0.05;
+
+    let students = [];
+    let sortState = { key: 'studentId', dir: 'asc' };
+    let cameraStream = null;
+    let capturedPhotos = [];
+    let pendingPhotoFiles = [];
+    let searchTerm = '';
+    let isLoading = false;
+    let currentEditingStudent = null; // Track which student is being edited
+    let pendingDeleteStudentId = null;
+    let pendingDeleteStudentName = '';
+    let lastDeleteTrigger = null;
+
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const deleteModalMessage = document.getElementById('deleteModalMessage');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const deleteBtnSpinner = document.getElementById('deleteBtnSpinner');
+    const deleteBtnText = document.getElementById('deleteBtnText');
+    const maskConfirmModal = document.getElementById('maskConfirmModal');
+    const maskPreviewImage = document.getElementById('maskPreviewImage');
+    const maskConfirmSummary = document.getElementById('maskConfirmSummary');
+    const maskConfidenceText = document.getElementById('maskConfidenceText');
+    const maskConfirmStatus = document.getElementById('maskConfirmStatus');
+    const maskConfirmYesBtn = document.getElementById('maskConfirmYesBtn');
+    const maskConfirmNoBtn = document.getElementById('maskConfirmNoBtn');
+    const maskConfirmSkipBtn = document.getElementById('maskConfirmSkipBtn');
+    const maskConfirmCloseBtn = document.getElementById('maskConfirmCloseBtn');
+    const maskChoiceButtons = document.querySelectorAll('.mask-choice');
+    const maskConfirmQueue = [];
+    let maskPromptActive = false;
+    let currentMaskPrompt = null;
+
+    function normalizeEmail(email) {
+      return (email || '').trim().toLowerCase();
+    }
+
+    function studentIdExists(id, excludeId = null) {
+      if (!id) return false;
+      return students.some(s => {
+        if (!s || !s.studentId) return false;
+        if (excludeId && s.studentId === excludeId) return false;
+        return s.studentId === id;
+      });
+    }
+
+    function emailExists(email, excludeId = null) {
+      const normalized = normalizeEmail(email);
+      if (!normalized) return false;
+      return students.some(s => {
+        if (!s || !s.email) return false;
+        if (excludeId && s.studentId === excludeId) return false;
+        return normalizeEmail(s.email) === normalized;
+      });
+    }
+
+    function needsMaskConfirmation(photo) {
+      if (!photo || !photo.autoMaskSuggestion) return false;
+      const confidence = typeof photo.maskConfidence === 'number' ? photo.maskConfidence : Number(photo.maskConfidence || 0);
+      if (confidence < MASK_AUTOCLEAR_FLOOR) return false;
+      return confidence < MASK_CONFIDENCE_THRESHOLD;
+    }
+
+    function handleMaskConfirmations(studentId, newPhotos = []) {
+      if (!Array.isArray(newPhotos) || newPhotos.length === 0) return;
+      const uncertain = newPhotos.filter(needsMaskConfirmation);
+      if (uncertain.length === 0) return;
+      maskConfirmQueue.push({ studentId, photos: uncertain });
+      if (!maskPromptActive) {
+        showNextMaskPrompt();
+      }
+    }
+
+    function showNextMaskPrompt() {
+      if (maskConfirmQueue.length === 0) {
+        currentMaskPrompt = null;
+        maskPromptActive = false;
+        if (maskConfirmModal.open) {
+          maskConfirmModal.close();
+        }
+        return;
+      }
+      currentMaskPrompt = maskConfirmQueue.shift();
+      maskPromptActive = true;
+      const previewPhoto = currentMaskPrompt.photos[0];
+      const count = currentMaskPrompt.photos.length;
+      const confidence = typeof previewPhoto.maskConfidence === 'number'
+        ? previewPhoto.maskConfidence
+        : Number(previewPhoto.maskConfidence || 0);
+      maskConfirmSummary.textContent = count === 1
+        ? 'We detected a possible mask in this photo but confidence is low.'
+        : `We detected possible masks in ${count} photos but confidence is low.`;
+      const confidencePct = Math.round(confidence * 100);
+      maskConfidenceText.textContent = `Detector confidence: ${confidencePct}%`;
+      maskPreviewImage.src = previewPhoto.imageData || 'https://dummyimage.com/480x480/f3f4f6/94a3b8&text=Photo';
+      maskPreviewImage.alt = 'Photo awaiting mask confirmation';
+      maskConfirmStatus.classList.add('hidden');
+      maskChoiceButtons.forEach(btn => btn.disabled = false);
+      maskConfirmModal.showModal();
+    }
+
+    function setMaskModalLoading(loading) {
+      maskChoiceButtons.forEach(btn => btn.disabled = loading);
+      if (loading) {
+        maskConfirmStatus.classList.remove('hidden');
+      } else {
+        maskConfirmStatus.classList.add('hidden');
+      }
+    }
+
+    async function submitMaskDecision(hasRealMask) {
+      if (!currentMaskPrompt || !Array.isArray(currentMaskPrompt.photos)) {
+        closeMaskPrompt(true);
+        return;
+      }
+      try {
+        setMaskModalLoading(true);
+        for (const photo of currentMaskPrompt.photos) {
+          await updatePhotoMaskStatus(currentMaskPrompt.studentId, photo.id, hasRealMask);
+        }
+        toast(hasRealMask ? 'Marked selected photo(s) as masked' : 'Marked selected photo(s) as unmasked', 'success');
+        closeMaskPrompt();
+      } catch (err) {
+        console.error('Failed to update mask status', err);
+        toast(err.message || 'Failed to update mask status', 'error');
+        setMaskModalLoading(false);
+      }
+    }
+
+    function closeMaskPrompt(skip = false) {
+      if (maskConfirmModal.open) {
+        maskConfirmModal.close();
+      }
+      currentMaskPrompt = null;
+      maskPromptActive = false;
+      if (!skip && maskConfirmQueue.length > 0) {
+        showNextMaskPrompt();
+      } else if (maskConfirmQueue.length > 0) {
+        // When skipping, clear remaining queue
+        maskConfirmQueue.length = 0;
+      }
+    }
+
+    async function updatePhotoMaskStatus(studentId, photoId, hasRealMask) {
+      const resp = await authRequest(`${APIBASE}/${encodeURIComponent(studentId)}/photos/${encodeURIComponent(photoId)}/mask-status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ hasRealMask })
+      });
+      if (!resp.ok) {
+        let body = null; try { body = await resp.json(); } catch {}
+        throw new Error(body?.message || 'Failed to update mask status');
+      }
+      return resp.json().catch(() => ({}));
+    }
+
+    // Enhanced toast function with icons
+    function toast(message, type = 'success') {
+      const t = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+      
+      msg.textContent = message;
+      
+      // Set colours and icons based on type
+      t.className = 'fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 z-50 max-w-sm';
+      
+      if (type === 'success') {
+        t.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-green-600');
+      } else if (type === 'error') {
+        t.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-red-600');
+      } else if (type === 'warning') {
+        t.classList.add('bg-yellow-50', 'text-yellow-800', 'border', 'border-yellow-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>';
+        icon.classList.add('text-yellow-600');
+      } else {
+        t.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>';
+        icon.classList.add('text-blue-600');
+      }
+      
+      t.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+      t.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        t.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+      }, 4000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function apiRequest(url, options = {}) {
+      try {
+        const resp = await authRequest(url, options);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.toLowerCase().includes('application/json')) {
+          return await resp.json();
+        }
+        return {};
+      } catch (err) {
+        console.error('API request failed', err);
+        throw err;
+      }
+    }
+
+    // Skeleton loader for table
+    function renderSkeletonRows(count = 5) {
+      const tbody = document.getElementById('tbody');
+      const rows = [];
+      for (let i = 0; i < count; i++) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-6 py-3"><div class="w-10 h-10 rounded-full skeleton"></div></td>
+          <td class="px-6 py-3"><div class="h-4 w-20 skeleton rounded"></div></td>
+          <td class="px-6 py-3"><div class="h-4 w-32 skeleton rounded"></div></td>
+          <td class="px-6 py-3"><div class="h-4 w-40 skeleton rounded"></div></td>
+          <td class="px-6 py-3"><div class="h-4 w-24 skeleton rounded"></div></td>
+          <td class="px-6 py-3"><div class="h-5 w-8 skeleton rounded-full"></div></td>
+          <td class="px-6 py-3 text-right"><div class="h-4 w-32 skeleton rounded ml-auto"></div></td>
+        `;
+        rows.push(tr);
+      }
+      tbody.replaceChildren(...rows);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tbody');
+      const rows = [];
+
+      const filtered = students.filter(s => {
+        if (!searchTerm) return true;
+        const t = searchTerm.toLowerCase();
+        return (s.studentId || '').toLowerCase().includes(t)
+            || (s.fullName || '').toLowerCase().includes(t)
+            || (s.phoneNumber || '').toLowerCase().includes(t);
+      });
+
+      const dir = sortState.dir === 'asc' ? 1 : -1;
+      filtered.sort((a, b) => {
+        const k = sortState.key;
+        const av = (a[k] || '').toString().toLowerCase();
+        const bv = (b[k] || '').toString().toLowerCase();
+        if (av < bv) return -1 * dir;
+        if (av > bv) return 1 * dir;
+        return 0;
+      });
+
+      document.getElementById('totalCountBadge').textContent = filtered.length.toString();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        document.getElementById('emptyState').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('emptyState').classList.add('hidden');
+
+      filtered.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 transition-colors';
+
+        const avatar = s.profilePhoto
+          ? `<img src="${escapeHtml(s.profilePhoto)}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" alt="">`
+          : `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-100 to-accent-100 border border-gray-200 flex items-center justify-center text-xs font-semibold text-brand-700">${escapeHtml((s.fullName || s.studentId || '?').slice(0,2).toUpperCase())}</div>`;
+
+        tr.innerHTML = `
+          <td class="px-6 py-3">
+            ${avatar}
+          </td>
+          <td class="px-6 py-3">
+            <div class="text-sm font-medium text-gray-900">${escapeHtml(s.studentId)}</div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="text-sm text-gray-900">${escapeHtml(s.fullName)}</div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="text-sm text-gray-700">${escapeHtml(s.email) || '<span class="text-gray-400 italic">Not provided</span>'}</div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="text-sm text-gray-700">${escapeHtml(s.phoneNumber) || '<span class="text-gray-400 italic">Not provided</span>'}</div>
+          </td>
+          <td class="px-6 py-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${s.photoCount>0?'bg-green-50 text-green-700 border border-green-200':'bg-gray-100 text-gray-700 border border-gray-200'}">${s.photoCount || 0}</span>
+          </td>
+          <td class="px-6 py-3 text-right">
+            <div class="inline-flex gap-2">
+              <a href="student-view.html?id=${encodeURIComponent(s.studentId)}" class="text-brand-600 hover:text-brand-700 text-sm font-medium hover:underline transition-colors">View</a>
+              <button class="text-brand-600 hover:text-brand-700 text-sm font-medium hover:underline transition-colors" data-action="edit" data-id="${escapeHtml(s.studentId)}">Edit</button>
+              <button class="text-red-600 hover:text-red-700 text-sm font-medium hover:underline transition-colors" data-action="delete" data-id="${escapeHtml(s.studentId)}">Delete</button>
+            </div>
+          </td>
+        `;
+        rows.push(tr);
+      });
+      tbody.replaceChildren(...rows);
+    }
+
+    async function loadStudents() {
+      try {
+        isLoading = true;
+        renderSkeletonRows();
+        const data = await apiRequest(`${APIBASE}?search=${encodeURIComponent(searchTerm)}`);
+        if (data && data.success) {
+          students = data.data || [];
+        } else if (Array.isArray(data)) {
+          students = data;
+        } else if (data && data.students) {
+          students = data.students;
+        } else {
+          students = data?.data ?? [];
+        }
+        renderTable();
+      } catch (err) {
+        toast('Failed to load students', 'error');
+        document.getElementById('tbody').innerHTML = `
+          <tr><td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+            <svg class="w-12 h-12 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Failed to load students. Please try again.
+          </td></tr>
+        `;
+      } finally {
+        isLoading = false;
+      }
+    }
+
+    async function createStudent(studentData, photos = []) {
+      const formData = new FormData();
+      formData.append('studentId', studentData.studentId);
+      formData.append('fullName', studentData.fullName);
+      if (studentData.email) formData.append('email', studentData.email);
+      if (studentData.phoneNumber) formData.append('phoneNumber', studentData.phoneNumber);
+      photos.forEach(f => formData.append('photos', f));
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+      
+      // Show upload progress
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const progressLabel = document.getElementById('uploadProgressLabel');
+      
+      if (photos.length > 0) {
+        progressContainer.classList.remove('hidden');
+        progressLabel.textContent = 'Uploading photos...';
+      }
+      
+      const xhr = new XMLHttpRequest();
+      
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = `${percentComplete}%`;
+            progressText.textContent = `${percentComplete}%`;
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+          
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              resolve(result?.data || result || {});
+            } catch {
+              resolve({});
+            }
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error?.message || `HTTP ${xhr.status}`));
+            } catch {
+              reject(new Error(`HTTP ${xhr.status} ${xhr.statusText}`));
+            }
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+          reject(new Error('Network error'));
+        });
+        
+        xhr.open('POST', APIBASE);
+        xhr.setRequestHeader('Authorization', `Basic ${token}`);
+        xhr.send(formData);
+      });
+    }
+
+    async function updateStudent(originalId, payload) {
+      const resp = await authRequest(`${APIBASE}/${encodeURIComponent(originalId)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) {
+        let body = null; try { body = await resp.json(); } catch {}
+        throw new Error(body?.message || `Failed to update student`);
+      }
+      const data = await resp.json().catch(() => ({}));
+      return data?.data || data || {};
+    }
+
+    // ✅ NEW: Get existing photo IDs for a student
+    async function getStudentPhotoIds(studentId) {
+      try {
+        const resp = await authRequest(`${APIBASE}/${encodeURIComponent(studentId)}/detail`);
+        if (!resp.ok) return [];
+        const data = await resp.json();
+        if (data && data.success && data.data && Array.isArray(data.data.photos)) {
+          return data.data.photos.map(p => p.id).filter(Boolean);
+        }
+        return [];
+      } catch {
+        return [];
+      }
+    }
+
+    // ✅ NEW: Delete a specific photo
+    async function deletePhoto(studentId, photoId) {
+      const resp = await authRequest(`${APIBASE}/${encodeURIComponent(studentId)}/photos/${encodeURIComponent(photoId)}`, {
+        method: 'DELETE'
+      });
+      if (!resp.ok) {
+        let body = null; try { body = await resp.json(); } catch {}
+        throw new Error(body?.message || 'Failed to delete photo');
+      }
+    }
+
+    // ✅ NEW: Delete all existing photos before replacing
+    async function deleteAllStudentPhotos(studentId, onProgress) {
+      const photoIds = await getStudentPhotoIds(studentId);
+      if (photoIds.length === 0) {
+        if (onProgress) onProgress(0, 0);
+        return;
+      }
+      
+      for (let i = 0; i < photoIds.length; i++) {
+        await deletePhoto(studentId, photoIds[i]);
+        if (onProgress) onProgress(i + 1, photoIds.length);
+      }
+    }
+
+    // ✅ MODIFIED: Add photos (used after deleting existing ones)
+    async function addPhotosToStudent(studentId, photos = []) {
+      const formData = new FormData();
+      photos.forEach(f => formData.append('photos', f));
+      
+      // Show upload progress
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const progressLabel = document.getElementById('uploadProgressLabel');
+      
+      if (photos.length > 0) {
+        progressContainer.classList.remove('hidden');
+        progressLabel.textContent = 'Uploading new photos...';
+      }
+      
+      const xhr = new XMLHttpRequest();
+      
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = `${percentComplete}%`;
+            progressText.textContent = `${percentComplete}%`;
+          }
+        });
+        
+        xhr.addEventListener('load', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+          
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              resolve(result?.data || result || {});
+            } catch {
+              resolve({});
+            }
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error?.message || `HTTP ${xhr.status}`));
+            } catch {
+              reject(new Error(`HTTP ${xhr.status} ${xhr.statusText}`));
+            }
+          }
+        });
+        
+        xhr.addEventListener('error', () => {
+          progressContainer.classList.add('hidden');
+          progressBar.style.width = '0%';
+          reject(new Error('Network error'));
+        });
+        
+        xhr.open('POST', `${APIBASE}/${encodeURIComponent(studentId)}/photos`);
+        xhr.send(formData);
+      });
+    }
+
+    async function deleteStudent(studentId) {
+      const resp = await authRequest(`${APIBASE}/${encodeURIComponent(studentId)}`, { method: 'DELETE' });
+      if (!resp.ok) {
+        let body = null; try { body = await resp.json(); } catch {}
+        throw new Error(body?.message || 'Failed to delete student');
+      }
+    }
+
+    // Field validation with visual feedback
+    function validateField(input, errorEl, validator) {
+      const value = input.value.trim();
+      const result = validator(value);
+      
+      if (result.valid) {
+        input.classList.remove('border-red-300', 'focus:ring-red-500');
+        input.classList.add('border-green-300', 'focus:ring-green-500');
+        errorEl.classList.add('hidden');
+        if (input.id === 'sid') {
+          document.getElementById('sidValidIcon').classList.remove('hidden');
+        }
+      } else if (value) {
+        input.classList.add('border-red-300', 'focus:ring-red-500');
+        input.classList.remove('border-green-300', 'focus:ring-green-500');
+        errorEl.textContent = result.message;
+        errorEl.classList.remove('hidden');
+        if (input.id === 'sid') {
+          document.getElementById('sidValidIcon').classList.add('hidden');
+        }
+      } else {
+        input.classList.remove('border-red-300', 'focus:ring-red-500', 'border-green-300', 'focus:ring-green-500');
+        errorEl.classList.add('hidden');
+        if (input.id === 'sid') {
+          document.getElementById('sidValidIcon').classList.add('hidden');
+        }
+      }
+      
+      return result.valid;
+    }
+
+    function openStudentModal(mode = 'create', existing = null) {
+      const dlg = document.getElementById('studentModal');
+      document.getElementById('dlgTitle').textContent = mode === 'create' ? 'Add Student' : 'Edit Student';
+      const err = document.getElementById('formError');
+      err.classList.add('hidden'); err.textContent = '';
+
+      const sid = document.getElementById('sid');
+      const sname = document.getElementById('sname');
+      const semail = document.getElementById('semail');
+      const sphone = document.getElementById('sphone');
+      capturedPhotos = [];
+      pendingPhotoFiles = [];
+      currentEditingStudent = existing; // Track editing state
+
+      // Reset validation states
+      [sid, sname, semail, sphone].forEach(input => {
+        input.classList.remove('border-red-300', 'focus:ring-red-500', 'border-green-300', 'focus:ring-green-500');
+      });
+      ['sidError', 'snameError', 'semailError', 'sphoneError'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById('sidValidIcon').classList.add('hidden');
+
+      // Show/hide replace notice
+      const replaceNotice = document.getElementById('photoReplaceNotice');
+      if (existing) {
+        sid.value = existing.studentId || '';
+        sname.value = existing.fullName || '';
+        semail.value = existing.email || '';
+        sphone.value = existing.phoneNumber || '';
+        sid.disabled = true;
+        replaceNotice.classList.remove('hidden');
+      } else {
+        sid.value = ''; sname.value = ''; semail.value = ''; sphone.value = ''; sid.disabled = false;
+        replaceNotice.classList.add('hidden');
+      }
+
+      updateThumbs([]);
+      document.getElementById('uploadProgressContainer').classList.add('hidden');
+      dlg.showModal();
+    }
+
+    function closeStudentModal() {
+      document.getElementById('studentModal').close();
+      currentEditingStudent = null;
+    }
+
+    function showFormError(msg) {
+      const err = document.getElementById('formError');
+      err.textContent = msg;
+      err.classList.remove('hidden');
+    }
+
+    function updateThumbs(files) {
+      const wrap = document.getElementById('thumbs');
+      if (!files || files.length === 0) { wrap.innerHTML = ''; return; }
+      const frags = [];
+      files.forEach((f, idx) => {
+        const url = URL.createObjectURL(f);
+        const el = document.createElement('div');
+        el.className = 'relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 group';
+        el.innerHTML = `
+          <img src="${url}" class="w-full h-full object-cover transition-transform group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-medium text-gray-700">${idx + 1}</div>
+        `;
+        frags.push(el);
+      });
+      wrap.replaceChildren(...frags);
+    }
+
+    // Real-time validation
+    document.getElementById('sid').addEventListener('blur', (e) => {
+      validateField(e.target, document.getElementById('sidError'), (val) => {
+        if (!val) return { valid: false, message: 'Student ID is required' };
+        if (!idRe.test(val)) return { valid: false, message: 'Must be 8 digits starting with 0' };
+        const excludeId = currentEditingStudent?.studentId || null;
+        if (studentIdExists(val, excludeId)) return { valid: false, message: 'Student ID already exists' };
+        return { valid: true };
+      });
+    });
+
+    document.getElementById('sname').addEventListener('blur', (e) => {
+      validateField(e.target, document.getElementById('snameError'), (val) => {
+        if (!val) return { valid: false, message: 'Name is required' };
+        if (val.length < 2) return { valid: false, message: 'Name must be at least 2 characters' };
+        return { valid: true };
+      });
+    });
+
+    document.getElementById('semail').addEventListener('blur', (e) => {
+      const val = e.target.value.trim();
+      if (!val) {
+        e.target.classList.remove('border-red-300', 'focus:ring-red-500', 'border-green-300', 'focus:ring-green-500');
+        document.getElementById('semailError').classList.add('hidden');
+        return;
+      }
+      validateField(e.target, document.getElementById('semailError'), (v) => {
+        if (!emailRe.test(v)) return { valid: false, message: 'Invalid email address' };
+        const excludeId = currentEditingStudent?.studentId || null;
+        if (emailExists(v, excludeId)) return { valid: false, message: 'Email already exists' };
+        return { valid: true };
+      });
+    });
+
+    document.getElementById('sphone').addEventListener('blur', (e) => {
+      const val = e.target.value.trim();
+      if (!val) {
+        e.target.classList.remove('border-red-300', 'focus:ring-red-500', 'border-green-300', 'focus:ring-green-500');
+        document.getElementById('sphoneError').classList.add('hidden');
+        return;
+      }
+      validateField(e.target, document.getElementById('sphoneError'), (v) => {
+        if (!phoneRe.test(v)) return { valid: false, message: 'Invalid phone number' };
+        return { valid: true };
+      });
+    });
+
+    // Upload existing photos
+    maskConfirmYesBtn.addEventListener('click', () => submitMaskDecision(true));
+    maskConfirmNoBtn.addEventListener('click', () => submitMaskDecision(false));
+    maskConfirmSkipBtn.addEventListener('click', () => closeMaskPrompt(true));
+    maskConfirmCloseBtn.addEventListener('click', () => closeMaskPrompt(true));
+    maskConfirmModal.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeMaskPrompt(true);
+    });
+
+    document.getElementById('uploadPhotosBtn').addEventListener('click', () => {
+      document.getElementById('faces').click();
+    });
+    
+    document.getElementById('faces').addEventListener('change', (e) => {
+      const all = Array.from(e.target.files || []);
+      if (all.length === 0) return;
+      const accepted = [];
+      const rejected = [];
+      for (const f of all) {
+        const typeOk = /image\/(png|jpeg)/i.test(f.type);
+        const sizeOk = f.size <= 5 * 1024 * 1024;
+        if (typeOk && sizeOk) accepted.push(f); else rejected.push(f.name);
+      }
+      if (rejected.length) {
+        const sample = rejected.slice(0,3).join(', ');
+        const suffix = rejected.length > 3 ? '…' : '';
+        toast(`Skipped ${rejected.length} file${rejected.length===1?'':'s'} (invalid type or >5MB): ${sample}${suffix}`, 'warning');
+      }
+      if (!accepted.length) { e.target.value=''; return; }
+      if (accepted.length > MAXPHOTOS) {
+        toast(`Only the first ${MAXPHOTOS} photos will be used.`, 'info');
+      }
+      pendingPhotoFiles = accepted.slice(0, MAXPHOTOS);
+      updateThumbs(pendingPhotoFiles);
+      toast(`${pendingPhotoFiles.length} photo${pendingPhotoFiles.length===1?'':'s'} selected`, 'success');
+    });
+
+    // Camera capture
+    async function startCamera() {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      const video = document.getElementById('cameraPreview');
+      video.srcObject = cameraStream;
+      await video.play().catch(() => {});
+    }
+    
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+    }
+
+    async function openCameraModal() {
+      const dlg = document.getElementById('cameraModal');
+      document.getElementById('captureStatus').textContent = 'Click Start Capture to begin';
+      document.getElementById('cameraInstructions').textContent = 'Position your face clearly in the frame. 20 photos will be captured automatically at 0.25-second intervals.';
+      document.getElementById('startCaptureBtn').disabled = false;
+      document.getElementById('captureGrid').innerHTML = '';
+      dlg.showModal();
+      try {
+        await startCamera();
+        toast('Camera ready', 'success');
+      } catch (err) {
+        toast('Failed to access camera', 'error');
+        dlg.close();
+      }
+    }
+    
+    function closeCameraModal() {
+      stopCamera();
+      document.getElementById('cameraModal').close();
+    }
+
+    async function startPhotoCapture() {
+      const video = document.getElementById('cameraPreview');
+      const grid = document.getElementById('captureGrid');
+      const status = document.getElementById('captureStatus');
+      const startBtn = document.getElementById('startCaptureBtn');
+      const spinner = document.getElementById('captureBtnSpinner');
+      const btnText = document.getElementById('captureBtnText');
+
+      capturedPhotos = [];
+      grid.innerHTML = '';
+      startBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Capturing...';
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      const captureOne = () => new Promise(resolve => {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        if (!w || !h) { resolve(null); return; }
+        const size = Math.min(w, h);
+        const sx = (w - size) / 2;
+        const sy = (h - size) / 2;
+        canvas.width = 320; canvas.height = 320;
+        ctx.drawImage(video, sx, sy, size, size, 0, 0, 320, 320);
+        canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
+      });
+
+      for (let i = 0; i < MAXPHOTOS; i++) {
+        const blob = await captureOne();
+        if (blob) {
+          capturedPhotos.push(blob);
+          const url = URL.createObjectURL(blob);
+          const cell = document.createElement('div');
+          cell.className = 'relative aspect-square rounded-lg overflow-hidden bg-gray-100 animate-scale-in';
+          cell.innerHTML = `
+            <img src="${url}" class="w-full h-full object-cover" />
+            <div class="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-xs font-medium text-gray-700">${i+1}</div>
+          `;
+          grid.appendChild(cell);
+          status.textContent = `Captured ${capturedPhotos.length}/${MAXPHOTOS}`;
+        }
+        await new Promise(r => setTimeout(r, CAPTUREINTERVALMS));
+      }
+      
+      status.textContent = 'Capture complete! Close to use these images.';
+      startBtn.disabled = false;
+      spinner.classList.add('hidden');
+      btnText.textContent = 'Start Capture';
+      toast('20 photos captured successfully!', 'success');
+    }
+
+    // Hook camera modal buttons
+    document.getElementById('cameraCaptureBtn').addEventListener('click', openCameraModal);
+    document.getElementById('startCaptureBtn').addEventListener('click', startPhotoCapture);
+    document.getElementById('cancelCaptureBtn').addEventListener('click', () => {
+      if (capturedPhotos.length) {
+        pendingPhotoFiles = capturedPhotos.map((blob, idx) => new File([blob], `capture_${idx+1}.jpg`, { type: 'image/jpeg' }));
+        updateThumbs(pendingPhotoFiles);
+        toast(`${capturedPhotos.length} photos ready for upload`, 'success');
+      }
+      closeCameraModal();
+    });
+
+    // Modal controls
+    document.getElementById('cancelBtn').addEventListener('click', closeStudentModal);
+    document.getElementById('addBtn').addEventListener('click', () => openStudentModal('create'));
+    document.getElementById('emptyAddBtn').addEventListener('click', () => openStudentModal('create'));
+
+    // ✅ FIXED: Submit form with REPLACE behaviour for photo updates
+    document.getElementById('studentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const sid = document.getElementById('sid').value.trim();
+      const sname = document.getElementById('sname').value.trim();
+      const semail = document.getElementById('semail').value.trim();
+      const sphone = document.getElementById('sphone').value.trim();
+
+      if (!sid) return showFormError('Student ID is required.');
+      if (!idRe.test(sid)) return showFormError('Student ID must be 8 digits starting with 0.');
+      if (!sname) return showFormError('Full name is required.');
+      const excludeId = currentEditingStudent?.studentId || null;
+      if (studentIdExists(sid, excludeId)) return showFormError('Student ID already exists.');
+      if (semail) {
+        if (!emailRe.test(semail)) return showFormError('Invalid email address.');
+        if (emailExists(semail, excludeId)) return showFormError('Email already exists.');
+      }
+      if (sphone && !phoneRe.test(sphone)) return showFormError('Phone number should be up to 20 characters and use digits, spaces, +, -, or parentheses.');
+
+      const modeIsEdit = currentEditingStudent !== null;
+      const saveBtn = document.getElementById('saveBtn');
+      const spinner = document.getElementById('saveBtnSpinner');
+      const btnText = document.getElementById('saveBtnText');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const progressContainer = document.getElementById('uploadProgressContainer');
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressText = document.getElementById('uploadProgressText');
+      const progressLabel = document.getElementById('uploadProgressLabel');
+      
+      // Show loading state
+      saveBtn.disabled = true;
+      cancelBtn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = modeIsEdit ? 'Updating...' : 'Creating...';
+      
+      try {
+        if (modeIsEdit) {
+          // Update student details first
+          await updateStudent(sid, { 
+            studentId: sid, 
+            fullName: sname, 
+            email: semail || null, 
+            phoneNumber: sphone || null 
+          });
+          
+          // ✅ FIX: If new photos are provided, REPLACE all existing photos
+          if (pendingPhotoFiles.length > 0) {
+            progressContainer.classList.remove('hidden');
+            
+            // Step 1: Delete all existing photos
+            progressLabel.textContent = 'Removing old photos...';
+            progressBar.style.width = '10%';
+            progressText.textContent = '10%';
+            
+            await deleteAllStudentPhotos(sid, (completed, total) => {
+              const deleteProgress = 10 + (completed / total) * 30; // 10-40%
+              progressBar.style.width = `${deleteProgress}%`;
+              progressText.textContent = `${Math.round(deleteProgress)}%`;
+              progressLabel.textContent = `Removing old photos (${completed}/${total})...`;
+            });
+            
+            // Step 2: Upload new photos
+            progressLabel.textContent = 'Uploading new photos...';
+            progressBar.style.width = '40%';
+            progressText.textContent = '40%';
+            
+            const uploadResult = await addPhotosToStudent(sid, pendingPhotoFiles);
+            handleMaskConfirmations(sid, uploadResult?.photos || []);
+            
+            progressBar.style.width = '100%';
+            progressText.textContent = '100%';
+            
+            setTimeout(() => {
+              progressContainer.classList.add('hidden');
+              progressBar.style.width = '0%';
+            }, 500);
+            
+            toast(`Student updated with ${pendingPhotoFiles.length} new photo${pendingPhotoFiles.length===1?'':'s'} (replaced existing)`, 'success');
+          } else {
+            toast('Student updated successfully', 'success');
+          }
+        } else {
+          // Create new student with photos
+          const creationResult = await createStudent({ 
+            studentId: sid, 
+            fullName: sname, 
+            email: semail || null, 
+            phoneNumber: sphone || null 
+          }, pendingPhotoFiles);
+          handleMaskConfirmations(sid, creationResult?.photos || []);
+          toast('Student created successfully', 'success');
+        }
+        closeStudentModal();
+        await loadStudents();
+      } catch (err) {
+        showFormError(err.message || 'Failed to save student');
+        toast(err.message || 'Failed to save student', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.textContent = 'Save';
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = '0%';
+      }
+    });
+
+    function openDeleteModal(student, triggerBtn) {
+      pendingDeleteStudentId = student?.studentId || null;
+      pendingDeleteStudentName = student?.fullName || '';
+      lastDeleteTrigger = triggerBtn || null;
+
+      const safeName = pendingDeleteStudentName ? escapeHtml(pendingDeleteStudentName) : null;
+      const safeId = pendingDeleteStudentId ? escapeHtml(pendingDeleteStudentId) : null;
+      let highlightHtml = '<span class="delete-highlight">this student</span>';
+      if (safeName && safeId) {
+        highlightHtml = `<span class="delete-highlight">${safeName}</span><span class="delete-id-tag">(${safeId})</span>`;
+      } else if (safeName) {
+        highlightHtml = `<span class="delete-highlight">${safeName}</span>`;
+      } else if (safeId) {
+        highlightHtml = `<span class="delete-highlight">${safeId}</span>`;
+      }
+
+      deleteModalMessage.innerHTML = `You&rsquo;re about to permanently delete ${highlightHtml} from the system.`;
+
+      deleteModal.setAttribute('open', '');
+      confirmDeleteBtn.focus();
+    }
+
+    function closeDeleteModal() {
+      deleteModal.removeAttribute('open');
+      setDeleteLoading(false);
+      pendingDeleteStudentId = null;
+      pendingDeleteStudentName = '';
+      if (lastDeleteTrigger) {
+        lastDeleteTrigger.focus();
+        lastDeleteTrigger = null;
+      }
+    }
+
+    function setDeleteLoading(loading) {
+      if (loading) {
+        confirmDeleteBtn.disabled = true;
+        cancelDeleteBtn.disabled = true;
+        deleteBtnSpinner.classList.remove('hidden');
+        deleteBtnText.textContent = 'Deleting...';
+      } else {
+        confirmDeleteBtn.disabled = false;
+        cancelDeleteBtn.disabled = false;
+        deleteBtnSpinner.classList.add('hidden');
+        deleteBtnText.textContent = 'Delete';
+      }
+    }
+
+    cancelDeleteBtn.addEventListener('click', () => {
+      closeDeleteModal();
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) {
+        closeDeleteModal();
+      }
+    });
+
+    confirmDeleteBtn.addEventListener('click', async () => {
+      if (!pendingDeleteStudentId) return;
+      setDeleteLoading(true);
+      try {
+        await deleteStudent(pendingDeleteStudentId);
+        toast('Student deleted successfully', 'success');
+        closeDeleteModal();
+        await loadStudents();
+      } catch (err) {
+        setDeleteLoading(false);
+        toast(err.message || 'Failed to delete student', 'error');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && deleteModal.hasAttribute('open')) {
+        closeDeleteModal();
+      }
+    });
+
+    // Row actions
+    document.getElementById('tbody').addEventListener('click', async (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const s = students.find(x => x.studentId === id);
+      if (action === 'edit') {
+        openStudentModal('edit', s);
+      } else if (action === 'delete') {
+        openDeleteModal(s, btn);
+      }
+    });
+
+    // Sorting with visual feedback
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.getAttribute('data-sort');
+        if (sortState.key === key) {
+          sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortState.key = key; sortState.dir = 'asc';
+        }
+        renderTable();
+        
+        // Visual feedback
+        document.querySelectorAll('th[data-sort]').forEach(h => h.classList.remove('bg-gray-100'));
+        th.classList.add('bg-gray-100');
+        setTimeout(() => th.classList.remove('bg-gray-100'), 200);
+      });
+    });
+
+    // Search with debounce
+    const searchEl = document.getElementById('searchInput');
+    let searchTimer = null;
+    searchEl.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        searchTerm = searchEl.value.trim();
+        loadStudents();
+      }, 300);
+    });
+
+    // Import CSV/Excel
+    const importModal = document.getElementById('importModal');
+    const openImportModal = () => importModal.classList.remove('hidden');
+    const closeImportModal = () => importModal.classList.add('hidden');
+    document.getElementById('importBtn').addEventListener('click', () => {
+      openImportModal();
+    });
+    document.getElementById('closeImportModal').addEventListener('click', closeImportModal);
+    document.getElementById('importModalCancel').addEventListener('click', closeImportModal);
+    document.getElementById('importModalConfirm').addEventListener('click', () => {
+      closeImportModal();
+      document.getElementById('csvInput').click();
+    });
+    const templateDownloadTrigger = document.getElementById('importTemplateDownload');
+    if (templateDownloadTrigger) {
+      templateDownloadTrigger.addEventListener('click', () => {
+        window.open('testdata/sample-students.xlsx', '_blank');
+      });
+    }
+    
+    document.getElementById('csvInput').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      
+      toast('Importing students...', 'info');
+      
+      try {
+        const fileName = file.name?.toLowerCase() || '';
+        const isCsv = fileName.endsWith('.csv');
+        let rows = [];
+        let sheetName = '';
+
+        if (isCsv) {
+          const text = await file.text();
+          if (!text.trim()) {
+            toast('The CSV file appears to be empty.', 'warning');
+            return;
+          }
+          const wb = XLSX.read(text, { type: 'string', raw: false });
+          sheetName = wb.SheetNames[0];
+          if (!sheetName) {
+            toast('No data found in the CSV file.', 'error');
+            return;
+          }
+          rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
+        } else {
+          const data = await file.arrayBuffer();
+          const wb = XLSX.read(data, { type: 'array', raw: false });
+          sheetName = wb.SheetNames[0];
+          if (!sheetName) {
+            toast('No worksheets found in the file.', 'error');
+            return;
+          }
+          rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '' });
+        }
+
+        if (!rows.length) {
+          toast('The file appears to be empty.', 'warning');
+          return;
+        }
+
+        const headerRaw = rows[0].map(h => (h || '').toString());
+        const header = headerRaw.map(h => h
+          .replace(/\uFEFF/g, '')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase()
+        );
+        const expectedHeader = ['student id', 'full name', 'email', 'phone number'];
+        const headerMatches = header.length >= expectedHeader.length &&
+          expectedHeader.every((col, idx) => header[idx] === col);
+        if (!headerMatches) {
+          toast('Invalid header order. Expected columns: Student ID, Full Name, Email, Phone Number.', 'error');
+          return;
+        }
+        
+        const imported = [];
+        const failed = [];
+        const existingIds = new Set(students.map(s => s?.studentId).filter(Boolean));
+        const existingEmails = new Set(students.map(s => normalizeEmail(s?.email)).filter(Boolean));
+        const processedIds = new Set();
+        const processedEmails = new Set();
+        
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i] || [];
+          const rowNumber = i + 1;
+          let sidRaw = (r[0] ?? '').toString().trim();
+          const digitsOnly = sidRaw.replace(/\D+/g, '');
+          if (!/^\d{8}$/.test(digitsOnly)) {
+            const padded = /^(?:\d{1,7})$/.test(digitsOnly) ? digitsOnly.padStart(8, '0') : digitsOnly;
+            failed.push({ row: rowNumber, sid: padded || sidRaw || 'N/A', reason: 'Student ID must be numeric and exactly 8 digits (e.g., 00000041).' });
+            continue;
+          }
+          const sid = digitsOnly;
+          const name = (r[1] || '').toString().trim();
+          const emailRaw = (r[2] || '').toString().trim();
+          const phoneRaw = (r[3] || '').toString().trim();
+
+          if (!sid && !name && !emailRaw && !phoneRaw) {
+            continue; // Skip blank rows silently
+          }
+
+          const reasons = [];
+          if (!sid) reasons.push('Student ID missing');
+          if (sid && !idRe.test(sid)) reasons.push('Student ID must be 8 digits starting with 0');
+          if (sid && (existingIds.has(sid) || processedIds.has(sid))) reasons.push('Student ID already exists');
+
+          if (!name) reasons.push('Full name missing');
+
+          if (!emailRaw) {
+            reasons.push('Email missing');
+          } else {
+            const emailNormalized = normalizeEmail(emailRaw);
+            if (!emailRe.test(emailRaw)) reasons.push('Invalid email format');
+            if (emailNormalized && (existingEmails.has(emailNormalized) || processedEmails.has(emailNormalized))) {
+              reasons.push('Email already exists');
+            }
+          }
+
+          if (phoneRaw && !phoneRe.test(phoneRaw)) reasons.push('Invalid phone number');
+
+          if (reasons.length) {
+            failed.push({ row: rowNumber, sid: sid || 'N/A', reason: reasons.join(', ') });
+            continue;
+          }
+
+          const payload = {
+            studentId: sid,
+            fullName: name,
+            email: emailRaw,
+            phoneNumber: phoneRaw || null
+          };
+
+          try {
+            await createStudent(payload, []);
+            imported.push(sid);
+            processedIds.add(sid);
+            existingIds.add(sid);
+            const normalizedEmail = normalizeEmail(emailRaw);
+            if (normalizedEmail) {
+              processedEmails.add(normalizedEmail);
+              existingEmails.add(normalizedEmail);
+            }
+          } catch (err) {
+            failed.push({ row: rowNumber, sid, reason: err?.message || 'Failed to import student' });
+          }
+        }
+
+        if (imported.length > 0) {
+          if (failed.length > 0) {
+            const details = failed.slice(0, 3).map(f => `Row ${f.row}: ${f.reason}`).join('; ');
+            const suffix = failed.length > 3 ? '…' : '';
+            toast(`Imported ${imported.length} student${imported.length===1?'':'s'}. ${failed.length} row${failed.length===1?'':'s'} skipped: ${details}${suffix}`, 'warning');
+          } else {
+            toast(`Imported ${imported.length} student${imported.length===1?'':'s'} successfully`, 'success');
+          }
+        } else if (failed.length > 0) {
+          const details = failed.slice(0, 3).map(f => `Row ${f.row}: ${f.reason}`).join('; ');
+          const suffix = failed.length > 3 ? '…' : '';
+          toast(`No students were imported. Issues found: ${details}${suffix}`, 'error');
+        } else {
+          toast('No students were imported', 'warning');
+        }
+
+        await loadStudents();
+      } catch (err) {
+        console.error('Import failed', err);
+        toast('Failed to import file. Please check the format.', 'error');
+      } finally {
+        e.target.value = '';
+      }
+    });
+
+    // Sidebar toggling
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      sidebar.classList.add('open'); overlay.classList.remove('hidden');
+    });
+    document.getElementById('closeSidebar').addEventListener('click', () => {
+      sidebar.classList.remove('open'); overlay.classList.add('hidden');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open'); overlay.classList.add('hidden');
+    });
+
+    setupLogoutModal(async () => {
+      try {
+        await authRequest('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error('Logout API error', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + K to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchEl.focus();
+      }
+      // Escape to close modals
+      if (e.key === 'Escape') {
+        if (document.getElementById('studentModal').open) closeStudentModal();
+        if (document.getElementById('cameraModal').open) closeCameraModal();
+      }
+    });
+
+    // Initial load
+    window.addEventListener('load', async () => {
+      const currentUser = getLoggedInUser();
+      if (!currentUser) {
+        return;
+      }
+      initialiseUserInterface(currentUser);
+      if ((currentUser.role || '').toUpperCase() !== 'ADMIN') {
+        window.location.href = 'home.html';
+        return;
+      }
+      await loadStudents();
+    });
+  </script>
+</body>
+</html>

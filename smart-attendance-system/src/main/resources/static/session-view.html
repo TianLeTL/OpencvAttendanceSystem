@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System - Session Details and Roster Management">
+  <title>Session Details · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce',
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0, 0, 0, 0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+            'brand': '0 4px 12px -2px rgba(59, 130, 246, 0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-down': 'slideDown 0.2s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideDown: {
+              '0%': { transform: 'translateY(-10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+    .attendance-chip {
+      transition: all 0.2s ease;
+    }
+
+    .attendance-chip:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen gradient-light">
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden" aria-hidden="true"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+
+      <!-- Logo Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar" class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="students.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <span>Students</span>
+        </a>
+
+        <a href="courses.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <span>Courses</span>
+        </a>
+
+        <a href="sessions.html" class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl" aria-current="page">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+
+        <a href="mark-attendance.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- User Profile Footer -->
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-64 min-h-screen">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex items-center justify-between px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <nav class="text-sm text-gray-500 mb-1">
+              <a href="sessions.html" class="hover:text-brand-600 transition-colors">Sessions</a>
+              <span class="mx-2">/</span>
+              <span class="text-gray-900 font-medium">Session Details</span>
+            </nav>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900" id="pageTitle">Session Details</h2>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="p-4 md:p-8 space-y-6 animate-fade-in max-w-7xl mx-auto">
+
+      <!-- Session Header Card -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-soft p-6">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+
+          <!-- Session Info -->
+          <div class="flex-1">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3" id="sessionTitle">Loading...</h1>
+            <div class="space-y-2 text-sm text-gray-600" id="sessionMeta">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Loading session details...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status and Actions -->
+          <div class="flex flex-col items-start lg:items-end gap-4">
+            <span class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full border" id="sessionStatusBadge">
+              <span class="w-2 h-2 rounded-full"></span>
+              <span>—</span>
+            </span>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative" data-role="attendance-staff">
+                <button id="exportButton" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" aria-haspopup="true" aria-expanded="false">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Export
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div id="exportMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-soft-lg border border-gray-200 py-2 z-50 animate-slide-down">
+                  <button class="export-option w-full px-4 py-2.5 text-left hover:bg-gray-50 transition-colors" data-export="csv">
+                    <div class="text-sm font-medium text-gray-900">CSV</div>
+                    <div class="text-xs text-gray-500">Comma-separated values</div>
+                  </button>
+                  <button class="export-option w-full px-4 py-2.5 text-left hover:bg-gray-50 transition-colors" data-export="xlsx">
+                    <div class="text-sm font-medium text-gray-900">Excel (.xlsx)</div>
+                    <div class="text-xs text-gray-500">Open in spreadsheet apps</div>
+                  </button>
+                  <button class="export-option w-full px-4 py-2.5 text-left hover:bg-gray-50 transition-colors" data-export="pdf">
+                    <div class="text-sm font-medium text-gray-900">PDF</div>
+                    <div class="text-xs text-gray-500">Printable session report</div>
+                  </button>
+                </div>
+              </div>
+
+              <button id="openScannerBtn" data-role="attendance-staff" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Mark Attendance
+              </button>
+
+              <button id="startSessionBtn" data-role="session-manager" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-brand-500 to-brand-600 rounded-lg hover:from-brand-600 hover:to-brand-700 transition-colors shadow-brand disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Start Session
+              </button>
+
+              <button id="closeSessionBtn" data-role="session-manager" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Close Session
+              </button>
+            </div>
+            <p id="startWindowHint" class="text-xs text-gray-500 mt-1 hidden">Start available 15 minutes before the scheduled time.</p>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+          <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+            <div class="text-xs font-medium text-gray-500 mb-1">Total Students</div>
+            <div class="text-2xl font-bold text-gray-900" id="summaryTotal">0</div>
+          </div>
+
+          <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+            <div class="text-xs font-medium text-green-600 mb-1">Present</div>
+            <div class="flex items-baseline gap-2">
+              <div class="text-2xl font-bold text-gray-900" id="summaryPresent">0</div>
+              <div class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full" id="summaryPresentPct">0%</div>
+            </div>
+          </div>
+
+          <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+            <div class="text-xs font-medium text-yellow-600 mb-1">Late</div>
+            <div class="flex items-baseline gap-2">
+              <div class="text-2xl font-bold text-gray-900" id="summaryLate">0</div>
+              <div class="text-xs font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full" id="summaryLatePct">0%</div>
+            </div>
+          </div>
+
+          <div class="bg-red-50 rounded-xl p-4 border border-red-200">
+            <div class="text-xs font-medium text-red-600 mb-1">Absent</div>
+            <div class="flex items-baseline gap-2">
+              <div class="text-2xl font-bold text-gray-900" id="summaryAbsent">0</div>
+              <div class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded-full" id="summaryAbsentPct">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls and Filters -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-soft p-4 md:p-6">
+        <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+
+          <!-- Filter Tabs and Search -->
+          <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full lg:w-auto">
+            <div class="flex flex-wrap gap-2" role="tablist" aria-label="Attendance filters">
+              <button class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all bg-brand-50 text-brand-700 border-2 border-brand-200" role="tab" aria-selected="true" data-filter="all">All</button>
+              <button class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50 border-2 border-transparent" role="tab" aria-selected="false" data-filter="PRESENT">Present</button>
+              <button class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50 border-2 border-transparent" role="tab" aria-selected="false" data-filter="LATE">Late</button>
+              <button class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50 border-2 border-transparent" role="tab" aria-selected="false" data-filter="ABSENT">Absent</button>
+            </div>
+
+            <div class="relative w-full sm:w-64">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input type="search" id="searchInput" class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all" placeholder="Search by ID or name" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Bulk Actions -->
+          <div class="flex flex-wrap gap-2">
+            <button id="markAllPresentBtn" class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              Mark All Present
+            </button>
+            <button id="markAllAbsentBtn" class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              Mark All Absent
+            </button>
+            <button id="markSelectedLateBtn" class="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              Mark Selected Late
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roster Table -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left w-12">
+                  <input type="checkbox" id="selectAllCheckbox" class="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500" aria-label="Select all visible students" />
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Student ID</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[220px]">Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Attendance</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Remarks</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Method</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Last Marked</th>
+              </tr>
+            </thead>
+            <tbody id="rosterTbody" class="divide-y divide-gray-100">
+              <!-- Roster rows will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="rosterEmpty" class="hidden px-6 py-12">
+          <div class="text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <p class="text-sm text-gray-600 font-medium">No students in the roster</p>
+            <p class="text-xs text-gray-500 mt-1">Students will appear here once they're enrolled in this section</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    // ==================== AUTHENTICATION HELPERS ====================
+
+    let currentUser = null;
+    let userRole = 'ADMIN';
+
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    // ==================== AUTHENTICATION CHECK ====================
+
+    function checkAuth() {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        window.location.href = 'index.html';
+        return null;
+      }
+
+      try {
+        return JSON.parse(loggedInUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
+        return null;
+      }
+    }
+
+    // ==================== USER INTERFACE INITIALISATION ====================
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      userRole = (user.role || '').toUpperCase();
+      const isAdmin = userRole === 'ADMIN';
+      const isTeachingAssistant = userRole === 'TEACHING_ASSISTANT';
+      canManageSession = isAdmin || userRole === 'PROFESSOR';
+      canRecordAttendance = canManageSession || isTeachingAssistant;
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      document.querySelectorAll('[data-role="session-manager"]').forEach(el => {
+        if (canManageSession) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      document.querySelectorAll('[data-role="attendance-staff"]').forEach(el => {
+        if (canRecordAttendance) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    // ==================== MOBILE MENU ====================
+
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function openMobileMenu() {
+      sidebar.classList.add('open');
+      mobileOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    closeSidebar.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeMobileMenu();
+        }
+      });
+    });
+
+    // ==================== LOGOUT FUNCTIONALITY ====================
+    setupLogoutModal(async () => {
+      try {
+        await authFetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.error('Logout API error:', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ==================== SESSION MANAGEMENT ====================
+
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = parseInt(params.get('id'), 10);
+
+    if (!sessionId) {
+      document.querySelector('main').innerHTML = `
+        <div class="p-8 max-w-2xl mx-auto">
+          <div class="bg-white rounded-2xl border border-gray-200 shadow-soft p-8 text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">Session not specified</h2>
+            <p class="text-gray-600 mb-6">Please access this page via the Sessions list</p>
+            <a href="sessions.html" class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors">
+              Return to Sessions
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    const API_BASE = '/api/sessions';
+    let sessionData = null;
+    let roster = [];
+    let filterState = 'all';
+    let searchTerm = '';
+    let selectedIds = new Set();
+    let readOnly = false;
+    let canManageSession = true;
+    let canRecordAttendance = true;
+
+    const exportButton = document.getElementById('exportButton');
+    const exportMenu = document.getElementById('exportMenu');
+    let exportMenuOpen = false;
+
+    // ==================== UTILITY FUNCTIONS ====================
+
+    function toast(msg) {
+      alert(msg);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '';
+      const dt = new Date(value.replace(' ', 'T'));
+      return dt.toLocaleString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function computeSummaryFromRoster() {
+      const total = roster.length;
+      let present = 0, absent = 0, late = 0;
+
+      roster.forEach(entry => {
+        if (entry.attendanceStatus === 'PRESENT') present++;
+        else if (entry.attendanceStatus === 'ABSENT') absent++;
+        else if (entry.attendanceStatus === 'LATE') late++;
+      });
+
+      const recorded = present + absent + late;
+
+      return {
+        rosterCount: total,
+        presentCount: present,
+        absentCount: absent,
+        lateCount: late,
+        recordedCount: recorded
+      };
+    }
+
+    // ==================== API FUNCTIONS ====================
+
+    async function apiRequest(url, options = {}) {
+      const response = await authFetch(url, options);
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+      if (!response.ok || !data) {
+        const message = data?.message || `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+      return data;
+    }
+
+    async function loadSession() {
+      try {
+        const response = await apiRequest(`${API_BASE}/${sessionId}`);
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch session');
+        }
+
+        sessionData = response.data;
+        renderSessionHeader();
+      } catch (error) {
+        console.error('Failed to load session', error);
+        toast('Failed to load session: ' + error.message);
+      }
+    }
+
+    async function loadRoster() {
+      try {
+        const response = await apiRequest(`${API_BASE}/${sessionId}/roster`);
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch roster');
+        }
+
+        roster = (response.data || []).map(item => ({
+          rosterId: item.rosterId,
+          sessionId: item.sessionId,
+          studentId: item.studentId,
+          studentName: item.studentName ?? item.studentId,
+          studentEmail: item.studentEmail,
+          addedAt: item.addedAt,
+          addedBy: item.addedBy,
+          attendanceStatus: item.attendanceStatus,
+          remarks: item.notes,
+          markedAt: item.markedAt,
+          markedBy: item.markedBy,
+          markingMethod: item.markingMethod
+        }));
+
+        selectedIds.clear();
+
+        if (sessionData) {
+          sessionData.attendanceSummary = computeSummaryFromRoster();
+        }
+
+        renderSessionHeader();
+        renderRoster();
+      } catch (error) {
+        console.error('Failed to load roster', error);
+        toast('Failed to load roster: ' + error.message);
+      }
+    }
+
+    async function startOrCloseSession(action) {
+      if (!canManageSession) {
+        toast('Only administrators or professors can manage session state.');
+        return;
+      }
+      try {
+        const response = await apiRequest(`${API_BASE}/${sessionId}/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || `Failed to ${action} session`);
+        }
+
+        sessionData = response.data;
+        await loadRoster();
+        toast(`Session ${action === 'start' ? 'started' : 'closed'} successfully`);
+      } catch (error) {
+        console.error(`Failed to ${action} session`, error);
+        toast(`Failed to ${action} session: ` + error.message);
+      }
+    }
+
+    async function exportSessionFile(format) {
+      if (!canRecordAttendance) {
+        toast('Only assigned teaching staff can export session reports.');
+        return;
+      }
+      try {
+        const response = await authFetch(`${API_BASE}/${sessionId}/export?format=${encodeURIComponent(format)}`);
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.message || `Failed to export (${response.status})`);
+        }
+
+        const blob = await response.blob();
+        const extension = format === 'xlsx' ? 'xlsx' : format;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `session-${sessionId}.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Failed to export session', error);
+        toast('Failed to export session: ' + error.message);
+      }
+    }
+
+    // ==================== ATTENDANCE UPDATES ====================
+
+    function applyLocalUpdates(updates) {
+      const nowIso = new Date().toISOString();
+      updates.forEach(update => {
+        const entry = roster.find(item => item.studentId === update.studentId);
+        if (!entry) return;
+
+        if (update.status) entry.attendanceStatus = update.status;
+        if (Object.prototype.hasOwnProperty.call(update, 'remarks')) {
+          entry.remarks = update.remarks;
+        }
+        entry.markedAt = nowIso;
+      });
+    }
+
+    function revertLocalUpdates(previousStates) {
+      previousStates.forEach(prev => {
+        const entry = roster.find(item => item.studentId === prev.studentId);
+        if (!entry) return;
+
+        entry.attendanceStatus = prev.status;
+        entry.remarks = prev.remarks;
+        entry.markedAt = prev.markedAt;
+        entry.markedBy = prev.markedBy;
+      });
+    }
+
+    function applyServerRecords(records) {
+      (records || []).forEach(record => {
+        const entry = roster.find(item => item.studentId === record.studentId);
+        if (!entry) return;
+
+        entry.attendanceStatus = record.status;
+        entry.remarks = record.notes;
+        entry.markedAt = record.markedAt;
+        entry.markedBy = record.markedBy;
+        entry.markingMethod = record.markingMethod;
+      });
+    }
+
+    async function applyAttendanceUpdates(updates, options = {}) {
+      if (!updates || updates.length === 0) return;
+
+      const previousStates = updates.map(update => {
+        const entry = roster.find(item => item.studentId === update.studentId);
+        return entry ? {
+          studentId: entry.studentId,
+          status: entry.attendanceStatus,
+          remarks: entry.remarks,
+          markedAt: entry.markedAt,
+          markedBy: entry.markedBy
+        } : null;
+      }).filter(Boolean);
+
+      applyLocalUpdates(updates);
+      renderRoster();
+
+      try {
+        const payload = {
+          markedByUserId: null,
+          updates: updates.map(update => ({
+            studentId: update.studentId,
+            status: update.status,
+            notes: update.remarks ?? null
+          }))
+        };
+
+        const response = await apiRequest(`${API_BASE}/${sessionId}/attendance`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || 'Attendance update failed');
+        }
+
+        applyServerRecords(response.data);
+        sessionData.attendanceSummary = computeSummaryFromRoster();
+        renderSessionHeader();
+        renderRoster();
+
+        if (options.toast !== false) {
+          toast('Attendance updated');
+        }
+      } catch (error) {
+        console.error('Failed to update attendance', error);
+
+        if (options.revert !== false) {
+          revertLocalUpdates(previousStates);
+          renderRoster();
+        }
+
+        toast('Failed to update attendance: ' + error.message);
+        throw error;
+      }
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+
+    function renderSessionHeader() {
+      if (!sessionData) return;
+
+      document.getElementById('sessionTitle').textContent = `${sessionData.courseCode} · ${sessionData.sectionCode}`;
+      document.getElementById('pageTitle').textContent = `${sessionData.courseCode} · ${sessionData.sectionCode}`;
+
+      const start = new Date(sessionData.startDateTime.replace(' ', 'T'));
+      const end = new Date(sessionData.endDateTime.replace(' ', 'T'));
+
+      const metaLines = [
+        {
+          icon: `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>`,
+          text: sessionData.courseName
+        },
+        {
+          icon: `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`,
+          text: start.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+        },
+        {
+          icon: `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+          text: `${start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} – ${end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+        },
+        {
+          icon: `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`,
+          text: `Location: ${sessionData.location || 'None'}`
+        }
+      ];
+
+      document.getElementById('sessionMeta').innerHTML = metaLines.map(line =>
+        `<div class="flex items-center gap-2">${line.icon}<span>${line.text}</span></div>`
+      ).join('');
+
+      // Status badge
+      const badgeEl = document.getElementById('sessionStatusBadge');
+      const status = sessionData.status || 'PENDING';
+      const statusUpper = status.toUpperCase();
+
+      let badgeClasses = 'bg-blue-50 text-blue-700 border-blue-200';
+      let dotClasses = 'bg-blue-500';
+
+      if (statusUpper === 'OPEN') {
+        badgeClasses = 'bg-green-50 text-green-700 border-green-200';
+        dotClasses = 'bg-green-500';
+      } else if (statusUpper === 'CLOSED') {
+        badgeClasses = 'bg-gray-50 text-gray-700 border-gray-200';
+        dotClasses = 'bg-gray-400';
+      }
+
+      badgeEl.className = `inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full border ${badgeClasses}`;
+      badgeEl.innerHTML = `<span class="w-2 h-2 rounded-full ${dotClasses}"></span><span>${status}</span>`;
+
+      // Summary
+      const summary = sessionData.attendanceSummary || computeSummaryFromRoster();
+      const total = summary.rosterCount ?? roster.length;
+      const present = summary.presentCount ?? 0;
+      const late = summary.lateCount ?? 0;
+      const absent = summary.absentCount ?? 0;
+
+      const formatPct = (count) => {
+        if (!total || total <= 0) return '0%';
+        return `${((count / total) * 100).toFixed(1)}%`;
+      };
+
+      document.getElementById('summaryTotal').textContent = total;
+      document.getElementById('summaryPresent').textContent = present;
+      document.getElementById('summaryLate').textContent = late;
+      document.getElementById('summaryAbsent').textContent = absent;
+      document.getElementById('summaryPresentPct').textContent = formatPct(present);
+      document.getElementById('summaryLatePct').textContent = formatPct(late);
+      document.getElementById('summaryAbsentPct').textContent = formatPct(absent);
+
+      // Buttons
+      const startBtn = document.getElementById('startSessionBtn');
+      const closeBtn = document.getElementById('closeSessionBtn');
+      const openScannerBtn = document.getElementById('openScannerBtn');
+      const startHint = document.getElementById('startWindowHint');
+
+      startBtn.disabled = !canManageSession || !sessionData.canStart;
+      closeBtn.disabled = !canManageSession || !sessionData.canClose;
+      openScannerBtn.disabled = !canRecordAttendance || sessionData.status !== 'OPEN';
+      openScannerBtn.dataset.sessionId = sessionData.sessionId;
+
+      if (startHint) {
+        const shouldShowHint = canManageSession && sessionData.status === 'PENDING' && !sessionData.canStart;
+        if (shouldShowHint) {
+          const availableAt = sessionData.startWindowOpensAt ? formatDateTime(sessionData.startWindowOpensAt) : null;
+          const message = availableAt
+            ? `Start available from ${availableAt} (15 minutes before the scheduled start).`
+            : 'Start available 15 minutes before the scheduled start time.';
+          startHint.textContent = message;
+          startHint.classList.remove('hidden');
+          startBtn.setAttribute('title', message);
+        } else {
+          startHint.classList.add('hidden');
+          startBtn.removeAttribute('title');
+        }
+      }
+
+      const isPending = sessionData.status === 'PENDING';
+      readOnly = isPending || !canRecordAttendance;
+      updateBulkButtons();
+    }
+
+    function renderRoster() {
+      const tbody = document.getElementById('rosterTbody');
+      tbody.innerHTML = '';
+
+      const filtered = roster.filter(entry => {
+        if (filterState !== 'all') {
+          if (filterState === 'UNMARKED') {
+            if (entry.attendanceStatus) return false;
+          } else if (entry.attendanceStatus !== filterState) {
+            return false;
+          }
+        }
+
+        if (!searchTerm) return true;
+
+        const term = searchTerm.toLowerCase();
+        return entry.studentId.toLowerCase().includes(term) ||
+               (entry.studentName || '').toLowerCase().includes(term);
+      });
+
+      document.getElementById('rosterEmpty').classList.toggle('hidden', filtered.length !== 0);
+
+      filtered.forEach(entry => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 transition-colors';
+
+        const status = entry.attendanceStatus;
+        const presentActive = status === 'PRESENT';
+        const absentActive = status === 'ABSENT';
+        const lateActive = status === 'LATE';
+
+        tr.innerHTML = `
+          <td class="px-4 py-3">
+            <input type="checkbox" data-student="${entry.studentId}" ${selectedIds.has(entry.studentId) ? 'checked' : ''} ${readOnly ? 'disabled' : ''} class="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500">
+          </td>
+          <td class="px-6 py-3">
+            <span class="text-sm font-medium text-gray-900">${escapeHtml(entry.studentId)}</span>
+          </td>
+          <td class="px-6 py-3 min-w-[220px]">
+            <span class="text-sm text-gray-900">${escapeHtml(entry.studentName || 'Unnamed')}</span>
+          </td>
+          <td class="px-6 py-3">
+            <span class="text-sm text-gray-600">${escapeHtml(entry.studentEmail || '—')}</span>
+          </td>
+          <td class="px-6 py-3 min-w-[260px]">
+            <div class="flex flex-wrap gap-2 sm:flex-nowrap">
+              <button class="attendance-chip px-3 py-1.5 text-xs font-medium rounded-full transition-all ${presentActive ? 'bg-green-500 text-white border-2 border-green-500' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-green-500'}" data-attendance="${presentActive ? '' : 'PRESENT'}" data-student="${entry.studentId}" ${readOnly ? 'disabled' : ''}>Present</button>
+              <button class="attendance-chip px-3 py-1.5 text-xs font-medium rounded-full transition-all ${lateActive ? 'bg-yellow-500 text-white border-2 border-yellow-500' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-yellow-500'}" data-attendance="${lateActive ? '' : 'LATE'}" data-student="${entry.studentId}" ${readOnly ? 'disabled' : ''}>Late</button>
+              <button class="attendance-chip px-3 py-1.5 text-xs font-medium rounded-full transition-all ${absentActive ? 'bg-red-500 text-white border-2 border-red-500' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-red-500'}" data-attendance="${absentActive ? '' : 'ABSENT'}" data-student="${entry.studentId}" ${readOnly ? 'disabled' : ''}>Absent</button>
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-2">
+              <span class="text-sm ${entry.remarks ? 'text-gray-900' : 'text-gray-400 italic'}">${escapeHtml(entry.remarks || 'No remarks')}</span>
+              ${readOnly ? '' : `<button class="text-xs text-brand-600 hover:text-brand-700 font-medium" data-action="edit-remark" data-student="${entry.studentId}">Edit</button>`}
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <span class="text-sm ${entry.markingMethod ? 'text-gray-900' : 'text-gray-400 italic'}">${entry.markingMethod || 'Not marked'}</span>
+          </td>
+          <td class="px-6 py-3">
+            ${entry.markedAt ? `
+              <div class="text-sm text-gray-900">${formatDateTime(entry.markedAt)}</div>
+              ${entry.markedBy ? `<div class="text-xs text-gray-500 mt-0.5">${escapeHtml(entry.markedBy)}</div>` : ''}
+            ` : '<span class="text-sm text-gray-400 italic">—</span>'}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      updateBulkButtons();
+    }
+
+    function updateBulkButtons() {
+      const count = selectedIds.size;
+      document.getElementById('markSelectedLateBtn').disabled = readOnly || count === 0;
+      document.getElementById('markAllPresentBtn').disabled = readOnly || roster.length === 0;
+      document.getElementById('markAllAbsentBtn').disabled = readOnly || roster.length === 0;
+
+      const selectAll = document.getElementById('selectAllCheckbox');
+      const visibleCheckboxes = Array.from(document.querySelectorAll('#rosterTbody input[type="checkbox"][data-student]'));
+
+      if (visibleCheckboxes.length === 0) {
+        selectAll.indeterminate = false;
+        selectAll.checked = false;
+        selectAll.disabled = true;
+      } else {
+        selectAll.disabled = readOnly;
+        const checked = visibleCheckboxes.filter(cb => cb.checked).length;
+        selectAll.checked = checked === visibleCheckboxes.length && checked > 0;
+        selectAll.indeterminate = checked > 0 && checked < visibleCheckboxes.length;
+      }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+
+    function initEventListeners() {
+      // Filter tabs
+      document.querySelectorAll('.filter-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.filter === filterState) return;
+
+          document.querySelectorAll('.filter-tab').forEach(b => {
+            b.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-50 border-2 border-transparent';
+            b.setAttribute('aria-selected', 'false');
+          });
+
+          filterState = btn.dataset.filter;
+          btn.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all bg-brand-50 text-brand-700 border-2 border-brand-200';
+          btn.setAttribute('aria-selected', 'true');
+          renderRoster();
+        });
+      });
+
+      // Search
+      document.getElementById('searchInput').addEventListener('input', event => {
+        searchTerm = event.target.value.trim();
+        renderRoster();
+      });
+
+      // Bulk actions
+      document.getElementById('markAllPresentBtn').addEventListener('click', async () => {
+        const updates = roster
+          .filter(entry => entry.attendanceStatus !== 'PRESENT')
+          .map(entry => ({ studentId: entry.studentId, status: 'PRESENT', remarks: entry.remarks ?? null }));
+
+        if (updates.length === 0) {
+          toast('Everyone is already marked present');
+          return;
+        }
+
+        await applyAttendanceUpdates(updates);
+      });
+
+      document.getElementById('markAllAbsentBtn').addEventListener('click', async () => {
+        const updates = roster
+          .filter(entry => entry.attendanceStatus !== 'ABSENT')
+          .map(entry => ({ studentId: entry.studentId, status: 'ABSENT', remarks: entry.remarks ?? null }));
+
+        if (updates.length === 0) {
+          toast('Everyone is already marked absent');
+          return;
+        }
+
+        await applyAttendanceUpdates(updates);
+      });
+
+      document.getElementById('markSelectedLateBtn').addEventListener('click', async () => {
+        const updates = roster
+          .filter(entry => selectedIds.has(entry.studentId) && entry.attendanceStatus !== 'LATE')
+          .map(entry => ({ studentId: entry.studentId, status: 'LATE', remarks: entry.remarks ?? null }));
+
+        if (updates.length === 0) {
+          toast('No selected students to mark late');
+          return;
+        }
+
+        await applyAttendanceUpdates(updates);
+      });
+
+      // Session actions
+      document.getElementById('openScannerBtn').addEventListener('click', () => {
+        if (!canRecordAttendance) {
+          toast('Only assigned teaching staff can launch attendance scanning.');
+          return;
+        }
+        const targetId = document.getElementById('openScannerBtn').dataset.sessionId || sessionId;
+        if (!targetId) {
+          toast('Session information missing');
+          return;
+        }
+        window.location.href = `mark-attendance.html?sessionId=${encodeURIComponent(targetId)}`;
+      });
+
+      document.getElementById('startSessionBtn').addEventListener('click', () => startOrCloseSession('start'));
+      document.getElementById('closeSessionBtn').addEventListener('click', () => startOrCloseSession('close'));
+
+      // Export menu
+      if (exportButton && exportMenu) {
+        exportButton.addEventListener('click', (event) => {
+          if (!canRecordAttendance) {
+            toast('Only assigned teaching staff can export session reports.');
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          exportMenuOpen = !exportMenuOpen;
+          exportMenu.classList.toggle('hidden', !exportMenuOpen);
+          exportButton.setAttribute('aria-expanded', String(exportMenuOpen));
+        });
+
+        document.querySelectorAll('.export-option').forEach(option => {
+          option.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            exportMenuOpen = false;
+            exportMenu.classList.add('hidden');
+            exportButton.setAttribute('aria-expanded', 'false');
+
+            if (option.dataset.export) {
+              exportSessionFile(option.dataset.export);
+            }
+          });
+        });
+      }
+
+      // Select all checkbox
+      document.getElementById('selectAllCheckbox').addEventListener('change', event => {
+        if (readOnly) {
+          event.target.checked = false;
+          return;
+        }
+
+        const checked = event.target.checked;
+        document.querySelectorAll('#rosterTbody input[type="checkbox"][data-student]').forEach(cb => {
+          cb.checked = checked;
+          if (checked) selectedIds.add(cb.dataset.student);
+          else selectedIds.delete(cb.dataset.student);
+        });
+
+        updateBulkButtons();
+      });
+
+      // Individual checkboxes
+      document.getElementById('rosterTbody').addEventListener('change', event => {
+        if (!(event.target instanceof HTMLInputElement)) return;
+        if (!event.target.dataset.student) return;
+        if (event.target.type !== 'checkbox') return;
+
+        if (event.target.checked) {
+          selectedIds.add(event.target.dataset.student);
+        } else {
+          selectedIds.delete(event.target.dataset.student);
+        }
+
+        updateBulkButtons();
+      });
+
+      // Attendance chips and remark editing
+      document.getElementById('rosterTbody').addEventListener('click', async event => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        // Attendance chip click
+        if (target.dataset.attendance && !readOnly) {
+          const studentId = target.dataset.student;
+          const desired = target.dataset.attendance;
+          if (!studentId || !desired) return;
+
+          const entry = roster.find(item => item.studentId === studentId);
+          if (!entry) return;
+          if (entry.attendanceStatus === desired) return;
+
+          await applyAttendanceUpdates([{ studentId, status: desired, remarks: entry.remarks ?? null }]);
+        }
+
+        // Edit remark
+        if (target.dataset.action === 'edit-remark' && !readOnly) {
+          const studentId = target.dataset.student;
+          const entry = roster.find(item => item.studentId === studentId);
+          if (!entry) return;
+
+          if (!entry.attendanceStatus) {
+            toast('Mark attendance before adding a remark');
+            return;
+          }
+
+          const current = entry.remarks || '';
+          const next = prompt('Update remark', current);
+          if (next === null) return;
+
+          const trimmed = next.trim();
+          await applyAttendanceUpdates([{ studentId, status: entry.attendanceStatus, remarks: trimmed }]);
+        }
+      });
+    }
+
+    // Close export menu when clicking outside
+    document.addEventListener('click', (event) => {
+      if (!exportMenuOpen || !exportMenu || !exportButton) return;
+      if (!exportMenu.contains(event.target) && !exportButton.contains(event.target)) {
+        exportMenuOpen = false;
+        exportMenu.classList.add('hidden');
+        exportButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        if (exportMenuOpen) {
+          exportMenuOpen = false;
+          exportMenu.classList.add('hidden');
+          exportButton.setAttribute('aria-expanded', 'false');
+        }
+        if (sidebar.classList.contains('open')) {
+          closeMobileMenu();
+        }
+      }
+    });
+
+    // ==================== INITIALISATION ====================
+
+    window.addEventListener('load', async () => {
+      if (!sessionId) return;
+
+      // Check authentication
+      currentUser = checkAuth();
+      if (!currentUser) return;
+
+      // Initialise user interface
+      initialiseUserInterface(currentUser);
+
+      // Initialise event listeners
+      initEventListeners();
+
+      // Load data
+      await loadSession();
+      if (sessionData) {
+        await loadRoster();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System · Manage courses, sections, and enrolments" />
+  <title>Courses · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a'
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce'
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          },
+          boxShadow: {
+            'soft': '0 8px 24px rgba(15,23,42,0.08)',
+            'soft-lg': '0 20px 50px rgba(15,23,42,0.12)',
+            'brand': '0 12px 32px rgba(59,130,246,0.18)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+
+    .course-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 20px 24px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      display: grid;
+      gap: 18px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .course-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .course-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .course-code {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2563eb;
+    }
+
+    .section-list {
+      display: grid;
+      gap: 12px;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 14px;
+    }
+
+    .section-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .section-item {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+      }
+    }
+
+    .section-info {
+      min-width: 200px;
+    }
+
+    .section-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .section-details {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #ffffff;
+      background: linear-gradient(180deg, #3b82f6, #2563eb);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn.secondary {
+      background: #f3f4f6;
+      color: #1f2937;
+      box-shadow: none;
+      border: 1px solid #e5e7eb;
+    }
+
+    .btn.danger {
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      box-shadow: 0 10px 24px rgba(220, 38, 38, 0.25);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 50;
+      padding: 16px;
+    }
+
+    .modal[open] {
+      display: flex;
+    }
+
+    .dialog {
+      width: min(680px, 92vw);
+      background: #ffffff;
+      color: #111827;
+      border-radius: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+      border: 1px solid #e5e7eb;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dialog h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .dialog-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 18px 18px 0 0;
+    }
+
+    .dialog-body {
+      padding: 20px 24px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .dialog-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-radius: 0 0 18px 18px;
+      background: #f9fafb;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #4b5563;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+
+    .input input,
+    .input textarea,
+    .input select {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #111827;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .combo-input {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      padding: 8px 10px;
+    }
+
+    .combo-box {
+      position: relative;
+      width: 100%;
+    }
+
+    .combo-box input[type="text"] {
+      border: none;
+      outline: none;
+      width: 100%;
+      font-size: 0.95rem;
+      background: transparent;
+      padding: 2px 0;
+    }
+
+    .combo-results {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 6px 0;
+      z-index: 40;
+    }
+
+    .combo-results.open {
+      display: block;
+    }
+
+    .combo-option {
+      padding: 10px 16px;
+      cursor: pointer;
+      display: grid;
+      gap: 2px;
+    }
+
+    .combo-option:hover,
+    .combo-option[aria-selected="true"] {
+      background: #f3f4f6;
+    }
+
+    .combo-option strong {
+      font-size: 0.9rem;
+      color: #111827;
+    }
+
+    .combo-option span {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .selected-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      font-size: 0.85rem;
+      color: #1e1b4b;
+    }
+
+    .selected-chip button {
+      border: none;
+      background: transparent;
+      color: #7c3aed;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .selected-chip button:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      font-size: 0.8rem;
+      color: #b91c1c;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      padding: 8px 10px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .grid-two {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .grid-one {
+      display: grid;
+      gap: 16px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #6b7280;
+      padding: 24px;
+      border: 1px dashed #d1d5db;
+      border-radius: 14px;
+      background: #f9fafb;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop[open] {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(460px, 92vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.18);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    .modal-body {
+      padding: 16px 24px 24px;
+    }
+
+    .delete-modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .delete-modal-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #fee2e2;
+      color: #b91c1c;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .delete-modal-subtitle {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .delete-modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .delete-modal-message {
+      font-size: 0.95rem;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .delete-warning-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+
+    .delete-warning-box svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .delete-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px 20px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .delete-cancel-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+      transition: background 0.2s ease, border 0.2s ease;
+    }
+
+    .delete-cancel-btn:hover {
+      background: #f3f4f6;
+      border-color: #cbd5f5;
+    }
+
+    .delete-confirm-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(180deg, #dc2626, #b91c1c);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.32);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .delete-confirm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
+    }
+
+    .delete-highlight {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .delete-id-tag {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1d4ed8;
+      background: #e0e7ff;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen gradient-light text-gray-900">
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden"
+    aria-hidden="true"></div>
+
+  <aside id="sidebar"
+    class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar"
+          class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          aria-label="Close menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+            </path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="students.html" data-role="admin-only"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="courses.html" data-role="admin-only"
+          class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl"
+          aria-current="page">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+          </svg>
+          <span>Courses</span>
+        </a>
+        <a href="sessions.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+        <a href="mark-attendance.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+            </path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only"
+            class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+              </path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200">
+      <div class="flex flex-wrap items-center justify-between gap-4 px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle"
+            class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Open menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Courses &amp; Sections</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Create courses, manage teaching sections, and maintain
+              enrolments.</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-end gap-3">
+          <button id="addBtn"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white text-sm font-semibold rounded-lg shadow-brand transition-all duration-200 hover:shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+              </path>
+            </svg>
+            <span class="hidden sm:inline">Add Course</span>
+            <span class="sm:hidden">Add</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-6">
+      <section class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-4">
+        <div class="flex flex-wrap gap-4 items-end justify-between">
+          <div class="flex-1 min-w-[240px]">
+            <label for="searchInput"
+              class="text-xs font-semibold text-gray-500 tracking-wide uppercase block mb-2">Search</label>
+            <div class="relative">
+              <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-4.3-4.3M10 18a8 8 0 110-16 8 8 0 010 16z"></path>
+              </svg>
+              <input id="searchInput" type="search" placeholder="Search by code or name" autocomplete="off"
+                class="block w-full rounded-xl border border-gray-200 bg-gray-25 pl-10 pr-4 py-3 text-sm text-gray-900 focus:border-brand-400 focus:ring focus:ring-brand-200/60" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-4">
+        <div id="coursesList" class="grid gap-4">
+          <!-- Course cards injected -->
+        </div>
+        <div id="emptyState" class="empty hidden">No courses yet. Click <strong>Add Course</strong> to begin.</div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal: Add/Edit Course -->
+  <div class="modal" id="courseModal" aria-modal="true" role="dialog" aria-labelledby="courseDlgTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="courseDlgTitle">Add Course</h2>
+      </div>
+      <div class="dialog-body">
+        <p class="error" id="courseFormError" role="alert" aria-live="assertive"></p>
+        <form id="courseForm" novalidate>
+          <div class="grid-two">
+            <div>
+              <label for="courseCode">Course Code *</label>
+              <div class="input"><input id="courseCode" name="courseCode" placeholder="e.g. CS102" required></div>
+            </div>
+            <div>
+              <label for="courseName">Course Name *</label>
+              <div class="input"><input id="courseName" name="courseName" placeholder="e.g. Programming Fundamentals"
+                  required></div>
+            </div>
+          </div>
+          <div class="grid-one">
+            <label for="courseDescription">Description</label>
+            <div class="input"><textarea id="courseDescription" name="courseDescription"
+                placeholder="Course description" rows="3"></textarea></div>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn secondary" id="courseCancelBtn">Cancel</button>
+            <button type="submit" class="btn" id="courseSaveBtn">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: View Sections -->
+  <div class="modal" id="sectionModal" aria-modal="true" role="dialog" aria-labelledby="sectionDlgTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="sectionDlgTitle">Sections for <span id="courseTitle"></span></h2>
+      </div>
+      <div class="dialog-body space-y-4">
+        <p class="error" id="sectionFormError" role="alert" aria-live="assertive"></p>
+        <div id="sectionsList"></div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn secondary" id="sectionCancelBtn">Close</button>
+        <button class="btn" id="addSectionBtn">➕ Add Section</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Section -->
+  <div class="modal" id="addSectionModal" aria-modal="true" role="dialog" aria-labelledby="addSectionDlgTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="addSectionDlgTitle">Add Section</h2>
+      </div>
+      <div class="dialog-body">
+        <p class="error" id="addSectionFormError" role="alert" aria-live="assertive"></p>
+        <form id="addSectionForm" novalidate>
+          <div class="grid-two">
+            <div>
+              <label for="sectionCode">Section Code *</label>
+              <div class="input"><input id="sectionCode" name="sectionCode" placeholder="e.g. G1" required></div>
+            </div>
+            <div>
+              <label for="maxCapacity">Max Capacity</label>
+              <div class="input"><input id="maxCapacity" name="maxCapacity" type="number" placeholder="50" value="50">
+              </div>
+            </div>
+            <div>
+              <label for="professorUserId">Professor</label>
+              <div class="input">
+                <select id="professorUserId" name="professorUserId"></select>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Select the professor responsible for this section.</p>
+            </div>
+            <div>
+              <label for="teachingAssistant1UserId">Teaching Assistant 1</label>
+              <div class="input">
+                <select id="teachingAssistant1UserId" name="teachingAssistant1UserId"></select>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Optional first teaching assistant.</p>
+            </div>
+            <div>
+              <label for="teachingAssistant2UserId">Teaching Assistant 2</label>
+              <div class="input">
+                <select id="teachingAssistant2UserId" name="teachingAssistant2UserId"></select>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Optional second teaching assistant.</p>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn secondary" id="addSectionCancelBtn">Cancel</button>
+            <button type="submit" class="btn" id="addSectionSaveBtn">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Manage Enrolments -->
+  <div class="modal" id="enrollmentModal" aria-modal="true" role="dialog" aria-labelledby="enrollmentDlgTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="enrollmentDlgTitle">Manage Students for Section <span id="sectionTitle"></span></h2>
+      </div>
+      <div class="dialog-body space-y-4">
+        <p class="error" id="enrollmentFormError" role="alert" aria-live="assertive"></p>
+        <div id="enrollmentsList"></div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn secondary" id="enrollmentCancelBtn">Close</button>
+        <button class="btn" id="addEnrollmentBtn">➕ Add Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Enrolment -->
+  <div class="modal" id="addEnrollmentModal" aria-modal="true" role="dialog" aria-labelledby="addEnrollmentDlgTitle">
+    <div class="dialog">
+      <div class="dialog-header">
+        <h2 id="addEnrollmentDlgTitle">Add Student to Section</h2>
+      </div>
+      <div class="dialog-body">
+        <p class="error" id="addEnrollmentFormError" role="alert" aria-live="assertive"></p>
+        <form id="addEnrollmentForm" novalidate>
+          <div class="grid-one">
+            <div>
+              <label for="studentSearch">Student *</label>
+              <div class="input combo-input">
+                <div class="combo-box">
+                  <input id="studentSearch" type="text" placeholder="Search by ID, name, or email" autocomplete="off"
+                    aria-autocomplete="list" aria-controls="studentSearchResults" aria-expanded="false">
+                  <input id="studentId" name="studentId" type="hidden">
+                  <div id="studentSearchResults" class="combo-results" role="listbox"
+                    aria-label="Student search results"></div>
+                </div>
+              <div id="selectedStudentsContainer" class="mt-3 hidden">
+                <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Selected Students</p>
+                <div id="selectedStudentsList" class="flex flex-wrap gap-2"></div>
+                <p class="text-xs text-gray-500 mt-1">Use the search above to add multiple students; remove any before saving.</p>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1" id="studentSearchHelp">Begin typing to search existing students,
+              then pick from the list.</p>
+            </div>
+            <div>
+              <label for="enrollmentStatus">Status</label>
+              <div class="input">
+                <select id="enrollmentStatus" name="enrollmentStatus">
+                  <option value="ENROLLED">ENROLLED</option>
+                  <option value="DROPPED">DROPPED</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn secondary" id="addEnrollmentCancelBtn">Cancel</button>
+            <button type="submit" class="btn" id="addEnrollmentSaveBtn">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Course Modal -->
+  <div id="courseDeleteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="courseDeleteTitle" aria-describedby="courseDeleteMessage">
+    <div class="modal-panel">
+      <div class="delete-modal-header">
+        <div class="delete-modal-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 9v3m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 5c-.77-1.333-2.694-1.333-3.464 0L4.34 17c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="courseDeleteTitle" class="delete-modal-title">Delete Course</h3>
+          <p class="delete-modal-subtitle">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-body delete-modal-body">
+        <p id="courseDeleteMessage" class="delete-modal-message">Are you sure you want to delete this course?</p>
+        <div class="delete-warning-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
+          </svg>
+          <span>This will remove all sections and sessions tied to this course.</span>
+        </div>
+      </div>
+      <div class="modal-actions delete-modal-actions">
+        <button type="button" id="courseDeleteCancelBtn" class="delete-cancel-btn">Cancel</button>
+        <button type="button" id="courseDeleteConfirmBtn" class="inline-flex items-center gap-2 delete-confirm-btn">
+          <svg id="courseDeleteSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="courseDeleteBtnText">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authRequest(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    (function enforceAdminOnlyPage() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(raw);
+        if ((user.role || '').toUpperCase() !== 'ADMIN') {
+          window.location.href = 'error.html';
+        }
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        window.location.href = 'index.html';
+      }
+    })();
+
+    function getLoggedInUser() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        handleUnauthorized();
+        return null;
+      }
+    }
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || 'ADMIN').toUpperCase();
+      const isAdmin = role === 'ADMIN';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
+
+    // Utils
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function toast(msg) { alert(msg); }
+
+    // API Base
+    const API_BASE_COURSES = '/api/courses';
+    const API_BASE_SECTIONS = '/api/sections';
+    const API_BASE_ENROLMENTS = '/api/section-enrolments';
+    const API_BASE_USERS = '/api/users';
+    const API_BASE_STUDENTS = '/api/students';
+
+    // State
+    let courses = [];
+    let currentCourseId = null;
+    let currentSectionId = null;
+    const studentDirectory = {
+      loaded: false,
+      loadingPromise: null,
+      items: []
+    };
+    const selectedEnrollmentStudents = [];
+    const selectedStudentsContainer = document.getElementById('selectedStudentsContainer');
+    const selectedStudentsList = document.getElementById('selectedStudentsList');
+
+    // Delete course modal elements
+    const courseDeleteModal = document.getElementById('courseDeleteModal');
+    const courseDeleteMessage = document.getElementById('courseDeleteMessage');
+    const courseDeleteCancelBtn = document.getElementById('courseDeleteCancelBtn');
+    const courseDeleteConfirmBtn = document.getElementById('courseDeleteConfirmBtn');
+    const courseDeleteSpinner = document.getElementById('courseDeleteSpinner');
+    const courseDeleteBtnText = document.getElementById('courseDeleteBtnText');
+    let pendingDeleteCourseId = null;
+    let pendingDeleteCourseName = '';
+    let pendingDeleteCourseCode = '';
+    let lastCourseDeleteTrigger = null;
+
+    // API Functions
+    async function apiRequest(url, options = {}) {
+      try {
+        const response = await authRequest(url, options);
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_) {
+          data = null;
+        }
+        if (!response.ok) {
+          const message = data && typeof data.message === 'string' && data.message.trim()
+            ? data.message.trim()
+            : `Request failed with status ${response.status}`;
+          const error = new Error(message);
+          error.status = response.status;
+          error.response = data;
+          throw error;
+        }
+        return data;
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+    }
+
+    async function loadCourses() {
+      try {
+        const response = await apiRequest(`${API_BASE_COURSES}?search=${encodeURIComponent($('#searchInput').value || '')}`);
+        if (response.success) {
+          courses = response.data || [];
+          renderCourses();
+        } else {
+          throw new Error(response.message || 'Failed to load courses');
+        }
+      } catch (error) {
+        console.error('Failed to load courses:', error);
+        toast('Failed to load courses: ' + error.message);
+      }
+    }
+
+    function renderCourses() {
+      const coursesList = $('#coursesList');
+      const emptyState = $('#emptyState');
+      coursesList.innerHTML = '';
+      if (courses.length === 0) {
+        emptyState.hidden = false;
+        return;
+      }
+      emptyState.hidden = true;
+      courses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        const rawDescription = (course.description ?? '').trim();
+        const descriptionHtml = rawDescription
+          ? `<p class=\"course-description text-sm text-gray-600 leading-relaxed mt-2\">${escapeHtml(rawDescription)}</p>`
+          : `<p class=\"course-description text-sm text-gray-400 italic mt-2\">No description provided.</p>`;
+        card.innerHTML = `
+          <div class=\"course-header\">
+            <div>
+              <div class=\"course-title\">${escapeHtml(course.courseName)}</div>
+              <div class=\"course-code\">${escapeHtml(course.courseCode)}</div>
+            </div>
+            <div class=\"flex flex-wrap gap-2\">
+              <button class=\"btn secondary\" data-action=\"view-sections\" data-id=\"${course.courseId}\">View Sections</button>
+              <button class=\"btn secondary\" data-action=\"edit\" data-id=\"${course.courseId}\">Edit</button>
+              <button class=\"btn danger\" data-action=\"delete\" data-id=\"${course.courseId}\">Delete</button>
+            </div>
+          </div>
+          ${descriptionHtml}
+          <div class=\"section-list\" id=\"sections-${course.courseId}\" hidden></div>
+        `;
+        coursesList.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str ?? '';
+    }
+
+    const staffState = {
+      loaded: false,
+      loadingPromise: null,
+      professors: [],
+      teachingAssistants: []
+    };
+
+    async function ensureStaffOptions() {
+      if (staffState.loaded) return staffState;
+      if (staffState.loadingPromise) return staffState.loadingPromise;
+
+      staffState.loadingPromise = (async () => {
+        try {
+          const [professorsResponse, assistantsResponse] = await Promise.all([
+            apiRequest(`${API_BASE_USERS}?role=PROFESSOR`),
+            apiRequest(`${API_BASE_USERS}?role=TEACHING_ASSISTANT`)
+          ]);
+
+          if (!professorsResponse.success) {
+            throw new Error(professorsResponse.message || 'Failed to load professors');
+          }
+          if (!assistantsResponse.success) {
+            throw new Error(assistantsResponse.message || 'Failed to load teaching assistants');
+          }
+
+          staffState.professors = professorsResponse.data || [];
+          staffState.teachingAssistants = assistantsResponse.data || [];
+          staffState.loaded = true;
+        } finally {
+          staffState.loadingPromise = null;
+        }
+        return staffState;
+      })();
+
+      return staffState.loadingPromise;
+    }
+
+    function populateUserSelect(selectEl, options, placeholderLabel) {
+      if (!selectEl) return;
+      selectEl.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = placeholderLabel;
+      selectEl.appendChild(placeholder);
+
+      options.forEach(user => {
+        const option = document.createElement('option');
+        option.value = String(user.userId);
+        const namePart = user.fullName ? user.fullName : user.username;
+        const usernamePart = user.fullName ? ` (${user.username})` : '';
+        option.textContent = `${namePart}${usernamePart}`;
+        if (user.email) option.dataset.email = user.email;
+        selectEl.appendChild(option);
+      });
+    }
+
+    function ensureOptionExists(selectEl, userId, label) {
+      if (!selectEl || !userId) return;
+      const value = String(userId);
+      if ([...selectEl.options].some(option => option.value === value)) {
+        return;
+      }
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label || `User ID ${value}`;
+      option.dataset.fallback = 'true';
+      selectEl.appendChild(option);
+    }
+
+    function parseOptionalUserId(rawValue, label) {
+      const trimmed = (rawValue ?? '').toString().trim();
+      if (trimmed === '') return null;
+      const parsed = Number(trimmed);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        showError('addSectionFormError', `${label} must be a positive integer.`);
+        return undefined;
+      }
+      return parsed;
+    }
+
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = message;
+      el.style.display = message ? 'block' : 'none';
+    }
+
+    function updateTeachingAssistantOptions() {
+      const ta1Select = $('#teachingAssistant1UserId');
+      const ta2Select = $('#teachingAssistant2UserId');
+      if (!ta1Select || !ta2Select) {
+        return;
+      }
+      const ta1Value = ta1Select.value;
+      const ta2Value = ta2Select.value;
+
+      [...ta1Select.options].forEach(option => {
+        if (!option.value) {
+          option.disabled = false;
+          return;
+        }
+        option.disabled = !!ta2Value && option.value === ta2Value && option.value !== ta1Value;
+      });
+
+      [...ta2Select.options].forEach(option => {
+        if (!option.value) {
+          option.disabled = false;
+          return;
+        }
+        option.disabled = !!ta1Value && option.value === ta1Value && option.value !== ta2Value;
+      });
+    }
+
+    function bindTeachingAssistantHandlers() {
+      const ta1Select = $('#teachingAssistant1UserId');
+      const ta2Select = $('#teachingAssistant2UserId');
+      if (!ta1Select || !ta2Select || ta1Select.dataset.bound === 'true') {
+        return;
+      }
+
+      const handleChange = (source) => {
+        const ta1Value = ta1Select.value;
+        const ta2Value = ta2Select.value;
+        if (ta1Value && ta2Value && ta1Value === ta2Value) {
+          if (source === 'ta1') {
+            ta2Select.value = '';
+          } else {
+            ta1Select.value = '';
+          }
+          showError('addSectionFormError', 'Teaching assistants must be different');
+        } else {
+          const errorEl = document.getElementById('addSectionFormError');
+          if (errorEl && errorEl.textContent === 'Teaching assistants must be different') {
+            showError('addSectionFormError', '');
+          }
+        }
+        updateTeachingAssistantOptions();
+      };
+
+      ta1Select.addEventListener('change', () => handleChange('ta1'));
+      ta2Select.addEventListener('change', () => handleChange('ta2'));
+      ta1Select.dataset.bound = 'true';
+      ta2Select.dataset.bound = 'true';
+    }
+
+    function getStudentSearchElements() {
+      return {
+        input: document.getElementById('studentSearch'),
+        hidden: document.getElementById('studentId'),
+        results: document.getElementById('studentSearchResults')
+      };
+    }
+
+    function setStudentResultsMessage(message) {
+      const { results } = getStudentSearchElements();
+      if (!results) return;
+      results.innerHTML = '';
+      const messageOption = document.createElement('div');
+      messageOption.className = 'combo-option muted';
+      messageOption.setAttribute('role', 'option');
+      messageOption.setAttribute('aria-disabled', 'true');
+      messageOption.textContent = message;
+      results.appendChild(messageOption);
+    }
+
+    function renderSelectedStudents() {
+      if (!selectedStudentsContainer || !selectedStudentsList) return;
+      if (!selectedEnrollmentStudents.length) {
+        selectedStudentsContainer.classList.add('hidden');
+        selectedStudentsList.innerHTML = '';
+        return;
+      }
+      selectedStudentsContainer.classList.remove('hidden');
+      selectedStudentsList.innerHTML = selectedEnrollmentStudents.map(student => `
+        <div class="selected-chip" data-student-id="${escapeHtml(student.id)}">
+          <span>${escapeHtml(student.fullName || 'Unnamed student')}</span>
+          <span class="text-xs text-indigo-700 font-semibold">${escapeHtml(student.id)}</span>
+          <button type="button" data-remove-student="${escapeHtml(student.id)}" aria-label="Remove ${escapeHtml(student.fullName || student.id)}">
+            Remove
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function addSelectedStudent(student) {
+      if (!student || !student.id) return;
+      if (selectedEnrollmentStudents.some(entry => entry.id === student.id)) {
+        toast(`${student.fullName || student.id} is already selected`);
+        return;
+      }
+      selectedEnrollmentStudents.push(student);
+      renderSelectedStudents();
+    }
+
+    function removeSelectedStudent(studentId) {
+      const index = selectedEnrollmentStudents.findIndex(entry => entry.id === studentId);
+      if (index !== -1) {
+        selectedEnrollmentStudents.splice(index, 1);
+        renderSelectedStudents();
+      }
+    }
+
+    function clearSelectedStudents() {
+      selectedEnrollmentStudents.length = 0;
+      renderSelectedStudents();
+    }
+
+    if (selectedStudentsList) {
+      selectedStudentsList.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-remove-student]');
+        if (button) {
+          removeSelectedStudent(button.dataset.removeStudent);
+        }
+      });
+    }
+
+    async function ensureStudentDirectory() {
+      if (studentDirectory.loaded) {
+        return studentDirectory.items;
+      }
+      if (studentDirectory.loadingPromise) {
+        return studentDirectory.loadingPromise;
+      }
+      studentDirectory.loadingPromise = (async () => {
+        const response = await apiRequest(`${API_BASE_STUDENTS}`);
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to load students');
+        }
+        studentDirectory.items = (response.data || []).map(student => ({
+          id: (student.studentId || '').trim(),
+          fullName: (student.fullName || '').trim(),
+          email: (student.email || '').trim()
+        })).sort((a, b) => {
+          const nameA = (a.fullName || a.id || '').toLowerCase();
+          const nameB = (b.fullName || b.id || '').toLowerCase();
+          if (nameA < nameB) return -1;
+          if (nameA > nameB) return 1;
+          return a.id.localeCompare(b.id);
+        });
+        studentDirectory.loaded = true;
+        return studentDirectory.items;
+      })().catch(error => {
+        studentDirectory.loaded = false;
+        throw error;
+      }).finally(() => {
+        studentDirectory.loadingPromise = null;
+      });
+      return studentDirectory.loadingPromise;
+    }
+
+    function renderStudentSearchResults(term = '') {
+      const { results } = getStudentSearchElements();
+      if (!results) return;
+      results.innerHTML = '';
+      const students = studentDirectory.items || [];
+      if (!students.length) {
+        setStudentResultsMessage('No students available in the system yet.');
+        return;
+      }
+      const normalized = term.trim().toLowerCase();
+      const matches = students.filter(student => {
+        if (!normalized) return true;
+        return student.id.toLowerCase().includes(normalized) ||
+          (student.fullName && student.fullName.toLowerCase().includes(normalized)) ||
+          (student.email && student.email.toLowerCase().includes(normalized));
+      }).slice(0, 15);
+
+      if (matches.length === 0) {
+        setStudentResultsMessage('No students found for that search.');
+        return;
+      }
+
+      matches.forEach(student => {
+        const option = document.createElement('div');
+        option.className = 'combo-option';
+        option.setAttribute('role', 'option');
+        option.dataset.id = student.id;
+        option.dataset.name = student.fullName;
+        option.dataset.email = student.email;
+        option.innerHTML = [
+          '<strong>', escapeHtml(student.fullName || 'Unnamed student'), '</strong>',
+          '<span>', escapeHtml(student.id),
+          student.email ? ' · ' + escapeHtml(student.email) : '',
+          '</span>'
+        ].join('');
+        results.appendChild(option);
+      });
+    }
+
+    function openStudentResults() {
+      const { input, results } = getStudentSearchElements();
+      if (!results || !input || input.disabled) return;
+      if (!results.classList.contains('open')) {
+        results.classList.add('open');
+        input.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function closeStudentResults() {
+      const { input, results } = getStudentSearchElements();
+      if (!results || !results.classList.contains('open')) return;
+      results.classList.remove('open');
+      if (input) {
+        input.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function resetStudentSearchField() {
+      const { input, hidden, results } = getStudentSearchElements();
+      if (!input || !hidden) return;
+      input.value = '';
+      input.disabled = false;
+      input.removeAttribute('data-selected');
+      hidden.value = '';
+      if (results) {
+        results.innerHTML = '';
+      }
+      closeStudentResults();
+    }
+
+    function applyStudentSelection(option) {
+      if (!option) return;
+      const { input, hidden } = getStudentSearchElements();
+      const student = {
+        id: option.dataset.id || '',
+        fullName: option.dataset.name || '',
+        email: option.dataset.email || ''
+      };
+      const mode = document.getElementById('addEnrollmentForm')?.dataset.mode || 'create';
+      if (mode === 'edit') {
+        if (!input || !hidden) return;
+        const displayParts = [];
+        if (student.fullName) displayParts.push(student.fullName);
+        displayParts.push(student.id);
+        if (student.email) displayParts.push(student.email);
+        input.value = displayParts.join(' · ');
+        input.dataset.selected = 'true';
+        hidden.value = student.id;
+      } else {
+        addSelectedStudent(student);
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+        if (hidden) {
+          hidden.value = '';
+        }
+      }
+      closeStudentResults();
+    }
+
+    function bindStudentSearchHandlers() {
+      const { input, results, hidden } = getStudentSearchElements();
+      if (!input || input.dataset.bound === 'true') return;
+
+      const handleInput = async (event) => {
+        if (!hidden) return;
+        hidden.value = '';
+        input.removeAttribute('data-selected');
+        const query = event.target.value || '';
+        try {
+          await ensureStudentDirectory();
+          renderStudentSearchResults(query);
+        } catch (error) {
+          console.error('Student search failed:', error);
+          setStudentResultsMessage(error.message || 'Unable to load students.');
+        }
+        openStudentResults();
+      };
+
+      const handleFocus = async () => {
+        if (input.disabled) return;
+        try {
+          await ensureStudentDirectory();
+          renderStudentSearchResults(input.value || '');
+        } catch (error) {
+          console.error('Student search load failed:', error);
+          setStudentResultsMessage(error.message || 'Unable to load students.');
+        }
+        openStudentResults();
+      };
+
+      const handleBlur = () => {
+        setTimeout(() => {
+          const { input: refreshedInput } = getStudentSearchElements();
+          if (refreshedInput && !refreshedInput.matches(':focus')) {
+            closeStudentResults();
+          }
+        }, 100);
+      };
+
+      input.addEventListener('input', handleInput);
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+
+      if (results) {
+        results.addEventListener('mousedown', event => {
+          // Prevent input blur before click handler runs
+          event.preventDefault();
+        });
+        results.addEventListener('click', event => {
+          const option = event.target.closest('.combo-option[data-id]');
+          if (!option || option.getAttribute('aria-disabled') === 'true') {
+            return;
+          }
+          applyStudentSelection(option);
+        });
+      }
+
+      document.addEventListener('click', event => {
+        if (!results || !input) return;
+        if (!results.contains(event.target) && event.target !== input) {
+          closeStudentResults();
+        }
+      });
+
+      input.dataset.bound = 'true';
+    }
+
+    // Event Listeners
+    $('#searchInput').addEventListener('input', loadCourses);
+    $('#addBtn').addEventListener('click', () => openCourseModal());
+    $('#courseCancelBtn').addEventListener('click', () => $('#courseModal').removeAttribute('open'));
+
+    $('#coursesList').addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      const action = button.dataset.action;
+      const courseId = button.dataset.id;
+      switch (action) {
+        case 'view-sections':
+          viewSections(courseId);
+          break;
+        case 'edit':
+          editCourse(courseId);
+          break;
+        case 'delete':
+          const course = courses.find(c => String(c.courseId) === String(courseId));
+          openCourseDeleteModal(course, button, courseId);
+          break;
+      }
+    });
+
+    // Course Functions
+    function editCourse(courseId) {
+      openCourseModal(courseId);
+    }
+
+    async function openCourseModal(courseId = null) {
+      const modal = $('#courseModal');
+      const title = $('#courseDlgTitle');
+      const form = $('#courseForm');
+      const error = $('#courseFormError');
+      error.style.display = 'none';
+      if (courseId) {
+        title.textContent = 'Edit Course';
+        const course = courses.find(c => c.courseId == courseId);
+        if (course) {
+          $('#courseCode').value = course.courseCode;
+          $('#courseName').value = course.courseName;
+          $('#courseDescription').value = course.description || '';
+        }
+        form.dataset.mode = 'edit';
+        form.dataset.id = courseId;
+      } else {
+        title.textContent = 'Add Course';
+        form.reset();
+        form.dataset.mode = 'create';
+        delete form.dataset.id;
+      }
+      modal.setAttribute('open', '');
+    }
+
+    $('#courseForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const mode = e.target.dataset.mode;
+      const courseCode = $('#courseCode').value.trim();
+      const courseName = $('#courseName').value.trim();
+      const description = $('#courseDescription').value.trim();
+      if (!courseCode || !courseName) {
+        showError('courseFormError', 'Course code and name are required');
+        return;
+      }
+      try {
+        if (mode === 'edit') {
+          const courseId = e.target.dataset.id;
+          const response = await apiRequest(`${API_BASE_COURSES}/${courseId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ courseCode, courseName, description })
+          });
+          if (response.success) {
+            toast('Course updated successfully');
+            $('#courseModal').removeAttribute('open');
+            loadCourses();
+          } else {
+            showError('courseFormError', response.message || 'Failed to update course');
+          }
+        } else {
+          const response = await apiRequest(API_BASE_COURSES, {
+            method: 'POST',
+            body: JSON.stringify({ courseCode, courseName, description })
+          });
+          if (response.success) {
+            toast('Course created successfully');
+            $('#courseModal').removeAttribute('open');
+            loadCourses();
+          } else {
+            showError('courseFormError', response.message);
+          }
+        }
+      } catch (error) {
+        showError('courseFormError', error.message);
+      }
+    });
+
+    $('#addSectionBtn').addEventListener('click', () => {
+      openAddSectionModal().catch(error => {
+        console.error('Failed to open section modal:', error);
+        showError('addSectionFormError', error.message);
+      });
+    });
+
+    async function openAddSectionModal(sectionId = null) {
+      const modal = $('#addSectionModal');
+      const title = $('#addSectionDlgTitle');
+      const form = $('#addSectionForm');
+      showError('addSectionFormError', '');
+      const professorSelect = $('#professorUserId');
+      const ta1Select = $('#teachingAssistant1UserId');
+      const ta2Select = $('#teachingAssistant2UserId');
+
+      try {
+        await ensureStaffOptions();
+      } catch (err) {
+        console.error('Failed to load staff options:', err);
+        showError('addSectionFormError', err.message || 'Unable to load staff lists. Please try again.');
+      }
+      populateUserSelect(professorSelect, staffState.professors, 'Select a professor *');
+      populateUserSelect(ta1Select, staffState.teachingAssistants, 'No teaching assistant assigned');
+      populateUserSelect(ta2Select, staffState.teachingAssistants, 'No teaching assistant assigned');
+
+      professorSelect.value = '';
+      ta1Select.value = '';
+      ta2Select.value = '';
+      bindTeachingAssistantHandlers();
+      updateTeachingAssistantOptions();
+      if (sectionId) {
+        title.textContent = 'Edit Section';
+        form.dataset.mode = 'edit';
+        form.dataset.id = sectionId;
+        try {
+          const response = await apiRequest(`${API_BASE_SECTIONS}/${sectionId}`);
+          if (response.success) {
+            const section = response.data;
+            $('#sectionCode').value = section.sectionCode;
+            $('#maxCapacity').value = section.maxCapacity;
+            if (section.professorUserId) {
+              ensureOptionExists(professorSelect, section.professorUserId, section.professorName || `User ID ${section.professorUserId}`);
+              professorSelect.value = String(section.professorUserId);
+            }
+            if (section.teachingAssistant1UserId) {
+              ensureOptionExists(ta1Select, section.teachingAssistant1UserId, section.teachingAssistant1Name || `User ID ${section.teachingAssistant1UserId}`);
+              ta1Select.value = String(section.teachingAssistant1UserId);
+            }
+            if (section.teachingAssistant2UserId) {
+              ensureOptionExists(ta2Select, section.teachingAssistant2UserId, section.teachingAssistant2Name || `User ID ${section.teachingAssistant2UserId}`);
+              ta2Select.value = String(section.teachingAssistant2UserId);
+            }
+            updateTeachingAssistantOptions();
+          }
+        } catch (error) {
+          console.error('Failed to load section:', error);
+          showError('addSectionFormError', error.message);
+        }
+      } else {
+        title.textContent = 'Add Section';
+        form.reset();
+        form.dataset.mode = 'create';
+        delete form.dataset.id;
+        $('#maxCapacity').value = 50;
+        professorSelect.value = '';
+        ta1Select.value = '';
+        ta2Select.value = '';
+        updateTeachingAssistantOptions();
+      }
+      modal.setAttribute('open', '');
+    }
+
+    $('#addSectionForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const mode = e.target.dataset.mode;
+      const sectionCode = $('#sectionCode').value.trim();
+      const maxCapacity = Number($('#maxCapacity').value);
+      showError('addSectionFormError', '');
+      if (!sectionCode) {
+        showError('addSectionFormError', 'Section code is required');
+        return;
+      }
+      const professorSelect = $('#professorUserId');
+      const professorUserId = parseOptionalUserId(professorSelect.value, 'Professor user ID');
+      if (professorUserId === undefined) return;
+      if (professorUserId === null) {
+        showError('addSectionFormError', 'Professor is required');
+        return;
+      }
+      let instructorName = '';
+      const selectedProfessorOption = professorSelect.options[professorSelect.selectedIndex];
+      if (selectedProfessorOption) {
+        instructorName = selectedProfessorOption.text;
+      }
+      const teachingAssistant1UserId = parseOptionalUserId($('#teachingAssistant1UserId').value, 'Teaching assistant 1 user ID');
+      if (teachingAssistant1UserId === undefined) return;
+      const teachingAssistant2UserId = parseOptionalUserId($('#teachingAssistant2UserId').value, 'Teaching assistant 2 user ID');
+      if (teachingAssistant2UserId === undefined) return;
+      if (teachingAssistant1UserId && teachingAssistant2UserId && teachingAssistant1UserId === teachingAssistant2UserId) {
+        showError('addSectionFormError', 'Teaching assistant slots must reference different users.');
+        return;
+      }
+      try {
+        if (mode === 'edit') {
+          const sectionId = e.target.dataset.id;
+          const response = await apiRequest(`${API_BASE_SECTIONS}/${sectionId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              sectionCode,
+              instructorName,
+              maxCapacity,
+              professorUserId,
+              teachingAssistant1UserId,
+              teachingAssistant2UserId,
+              courseId: Number(currentCourseId)
+            })
+          });
+          if (response.success) {
+            toast('Section updated successfully');
+            $('#addSectionModal').removeAttribute('open');
+            viewSections(currentCourseId);
+          } else {
+            showError('addSectionFormError', response.message || 'Failed to update section');
+          }
+        } else {
+          const response = await apiRequest(API_BASE_SECTIONS, {
+            method: 'POST',
+            body: JSON.stringify({
+              courseId: Number(currentCourseId),
+              sectionCode,
+              instructorName,
+              maxCapacity,
+              professorUserId,
+              teachingAssistant1UserId,
+              teachingAssistant2UserId
+            })
+          });
+          if (response.success) {
+            toast('Section created successfully');
+            $('#addSectionModal').removeAttribute('open');
+            viewSections(currentCourseId);
+          } else {
+            showError('addSectionFormError', response.message);
+          }
+        }
+      } catch (error) {
+        showError('addSectionFormError', error.message);
+      }
+    });
+
+    $('#addSectionCancelBtn').addEventListener('click', () => $('#addSectionModal').removeAttribute('open'));
+
+    async function viewSections(courseId) {
+      currentCourseId = courseId;
+      const course = courses.find(c => c.courseId == courseId);
+      $('#courseTitle').textContent = course ? course.courseName : '';
+      try {
+        const response = await apiRequest(`${API_BASE_SECTIONS}/course/${courseId}`);
+        if (response.success) {
+          renderSections(response.data || []);
+        }
+      } catch (error) {
+        toast('Failed to load sections: ' + error.message);
+      }
+      $('#sectionModal').setAttribute('open', '');
+    }
+
+    function renderSections(sections) {
+      const sectionsList = $('#sectionsList');
+      sectionsList.innerHTML = '';
+      if (sections.length === 0) {
+        sectionsList.innerHTML = '<div class=\"empty\">No sections yet. Click <strong>Add Section</strong> to begin.</div>';
+        return;
+      }
+      sections.forEach(section => {
+        const professorDisplay = section.professorName
+          ? section.professorName
+          : section.professorUserId ? `User ID ${section.professorUserId}` : 'Unassigned';
+        const taDisplays = [];
+        if (section.teachingAssistant1Name) {
+          taDisplays.push(section.teachingAssistant1Name);
+        } else if (section.teachingAssistant1UserId) {
+          taDisplays.push(`User ID ${section.teachingAssistant1UserId}`);
+        }
+        if (section.teachingAssistant2Name) {
+          taDisplays.push(section.teachingAssistant2Name);
+        } else if (section.teachingAssistant2UserId) {
+          taDisplays.push(`User ID ${section.teachingAssistant2UserId}`);
+        }
+        const taSummary = taDisplays.length ? taDisplays.join(', ') : 'None assigned';
+        const item = document.createElement('div');
+        item.className = 'section-item';
+        item.innerHTML = `
+          <div class=\"section-info\">
+            <div class=\"section-title\">${escapeHtml(section.sectionCode)}</div>
+            <div class=\"section-details space-y-1\">
+              <div>Professor: ${escapeHtml(professorDisplay)}</div>
+              <div>Teaching Assistants: ${escapeHtml(taSummary)}</div>
+              <div>Capacity: ${section.maxCapacity}</div>
+            </div>
+          </div>
+          <div class=\"section-actions\">
+            <button class=\"btn secondary\" data-action=\"view-enrollments\" data-id=\"${section.sectionId}\">Manage Students</button>
+            <button class=\"btn secondary\" data-action=\"edit-section\" data-id=\"${section.sectionId}\">Edit</button>
+            <button class=\"btn danger\" data-action=\"delete-section\" data-id=\"${section.sectionId}\">Delete</button>
+          </div>
+        `;
+        sectionsList.appendChild(item);
+      });
+    }
+
+    $('#sectionsList').addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      const action = button.dataset.action;
+      const sectionId = button.dataset.id;
+      switch (action) {
+        case 'view-enrollments':
+          viewEnrollments(sectionId);
+          break;
+        case 'edit-section':
+          editSection(sectionId);
+          break;
+        case 'delete-section':
+          deleteSection(sectionId);
+          break;
+      }
+    });
+
+    $('#sectionCancelBtn').addEventListener('click', () => $('#sectionModal').removeAttribute('open'));
+
+    function editSection(sectionId) {
+      openAddSectionModal(sectionId).catch(error => {
+        console.error('Failed to open section modal:', error);
+        showError('addSectionFormError', error.message);
+      });
+    }
+
+    async function deleteCourse(courseId) {
+      const response = await apiRequest(`${API_BASE_COURSES}/${courseId}`, { method: 'DELETE' });
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to delete course');
+      }
+      toast('Course deleted successfully');
+      await loadCourses();
+    }
+
+    function openCourseDeleteModal(course, triggerBtn, fallbackId) {
+      const parsedId = fallbackId !== undefined ? Number(fallbackId) : null;
+      pendingDeleteCourseId = course?.courseId ?? parsedId;
+      pendingDeleteCourseName = course?.courseName || '';
+      pendingDeleteCourseCode = course?.courseCode || '';
+      lastCourseDeleteTrigger = triggerBtn || null;
+
+      const safeName = pendingDeleteCourseName ? escapeHtml(pendingDeleteCourseName) : '';
+      const safeCode = pendingDeleteCourseCode ? escapeHtml(pendingDeleteCourseCode) : '';
+      let highlightHtml = '<span class="delete-highlight">this course</span>';
+      if (safeName && safeCode) {
+        highlightHtml = `<span class="delete-highlight">${safeName}</span><span class="delete-id-tag">${safeCode}</span>`;
+      } else if (safeName) {
+        highlightHtml = `<span class="delete-highlight">${safeName}</span>`;
+      } else if (safeCode) {
+        highlightHtml = `<span class="delete-highlight">${safeCode}</span>`;
+      }
+
+      courseDeleteMessage.innerHTML = `You&rsquo;re about to permanently delete ${highlightHtml} from the system.`;
+      courseDeleteModal.setAttribute('open', '');
+      courseDeleteConfirmBtn.focus();
+    }
+
+    function closeCourseDeleteModal() {
+      courseDeleteModal.removeAttribute('open');
+      setCourseDeleteLoading(false);
+      pendingDeleteCourseId = null;
+      pendingDeleteCourseName = '';
+      pendingDeleteCourseCode = '';
+      if (lastCourseDeleteTrigger) {
+        lastCourseDeleteTrigger.focus();
+        lastCourseDeleteTrigger = null;
+      }
+    }
+
+    function setCourseDeleteLoading(loading) {
+      if (loading) {
+        courseDeleteConfirmBtn.disabled = true;
+        courseDeleteCancelBtn.disabled = true;
+        courseDeleteSpinner.classList.remove('hidden');
+        courseDeleteBtnText.textContent = 'Deleting...';
+      } else {
+        courseDeleteConfirmBtn.disabled = false;
+        courseDeleteCancelBtn.disabled = false;
+        courseDeleteSpinner.classList.add('hidden');
+        courseDeleteBtnText.textContent = 'Delete';
+      }
+    }
+
+    courseDeleteCancelBtn.addEventListener('click', closeCourseDeleteModal);
+
+    courseDeleteModal.addEventListener('click', (e) => {
+      if (e.target === courseDeleteModal) {
+        closeCourseDeleteModal();
+      }
+    });
+
+    courseDeleteConfirmBtn.addEventListener('click', async () => {
+      if (!pendingDeleteCourseId) return;
+      setCourseDeleteLoading(true);
+      try {
+        await deleteCourse(pendingDeleteCourseId);
+        closeCourseDeleteModal();
+      } catch (error) {
+        setCourseDeleteLoading(false);
+        toast(error.message || 'Failed to delete course');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && courseDeleteModal.hasAttribute('open')) {
+        closeCourseDeleteModal();
+      }
+    });
+
+    async function deleteSection(sectionId) {
+      if (!confirm('Are you sure you want to delete this section?')) return;
+      try {
+        const response = await apiRequest(`${API_BASE_SECTIONS}/${sectionId}`, { method: 'DELETE' });
+        if (response.success) {
+          toast('Section deleted successfully');
+          viewSections(currentCourseId);
+        } else {
+          toast(response.message || 'Failed to delete section');
+        }
+      } catch (error) {
+        toast('Failed to delete section: ' + error.message);
+      }
+    }
+
+    function viewEnrollments(sectionId) {
+      currentSectionId = sectionId;
+      apiRequest(`${API_BASE_SECTIONS}/${sectionId}`).then(sectionResponse => {
+        if (sectionResponse.success) {
+          const section = sectionResponse.data;
+          $('#sectionTitle').textContent = section ? section.sectionCode : '';
+        }
+      }).catch(() => { });
+      apiRequest(`${API_BASE_ENROLMENTS}/section/${sectionId}`).then(response => {
+        if (response.success) {
+          renderEnrollments(response.data || []);
+        }
+      }).catch(error => {
+        toast('Failed to load enrollments: ' + error.message);
+      });
+      $('#enrollmentModal').setAttribute('open', '');
+    }
+
+    let enrollments = [];
+
+    function renderEnrollments(enrollmentArray) {
+      enrollments = enrollmentArray;
+      const enrollmentsList = $('#enrollmentsList');
+      enrollmentsList.innerHTML = '';
+      if (enrollmentArray.length === 0) {
+        enrollmentsList.innerHTML = '<div class=\"empty\">No students enrolled yet. Click <strong>Add Student</strong> to begin.</div>';
+        return;
+      }
+      enrollmentArray.forEach(enrollment => {
+        const item = document.createElement('div');
+        item.className = 'section-item';
+        item.innerHTML = `
+          <div class=\"section-info\">
+            <div class=\"section-title\">${escapeHtml(enrollment.studentName)}</div>
+            <div class=\"section-details\">ID: ${escapeHtml(enrollment.studentId)} | Status: ${enrollment.status}</div>
+          </div>
+          <div class=\"section-actions\">
+            <button class=\"btn secondary\" data-action=\"edit-enrollment\" data-id=\"${enrollment.enrolmentId}\">Edit</button>
+            <button class=\"btn danger\" data-action=\"remove-enrollment\" data-id=\"${enrollment.studentId}\">Remove</button>
+          </div>
+        `;
+        enrollmentsList.appendChild(item);
+      });
+    }
+
+    $('#enrollmentsList').addEventListener('click', e => {
+      const button = e.target.closest('[data-action]');
+      if (!button) return;
+      const action = button.dataset.action;
+      const enrollmentId = button.dataset.id;
+      switch (action) {
+        case 'edit-enrollment':
+          editEnrollment(enrollmentId);
+          break;
+        case 'remove-enrollment':
+          removeEnrollment(enrollmentId);
+          break;
+      }
+    });
+
+    $('#enrollmentCancelBtn').addEventListener('click', () => $('#enrollmentModal').removeAttribute('open'));
+    $('#addEnrollmentBtn').addEventListener('click', () => openAddEnrollmentModal());
+
+    async function openAddEnrollmentModal(enrollmentId = null) {
+      const modal = $('#addEnrollmentModal');
+      const form = $('#addEnrollmentForm');
+      const error = $('#addEnrollmentFormError');
+      const title = $('#addEnrollmentDlgTitle');
+      error.style.display = 'none';
+      bindStudentSearchHandlers();
+      const { input: studentSearchInput, hidden: studentIdInput, results: studentResults } = getStudentSearchElements();
+      const helpText = document.getElementById('studentSearchHelp');
+
+      clearSelectedStudents();
+
+      if (enrollmentId) {
+        title.textContent = 'Edit Enrollment';
+        form.dataset.mode = 'edit';
+        form.dataset.id = enrollmentId;
+        if (selectedStudentsContainer) {
+          selectedStudentsContainer.classList.add('hidden');
+        }
+        const enrollment = enrollments.find(e => e.enrolmentId == enrollmentId);
+        if (enrollment) {
+          if (studentIdInput) {
+            studentIdInput.value = enrollment.studentId;
+          }
+          $('#enrollmentStatus').value = enrollment.status;
+          if (studentSearchInput) {
+            const displayParts = [];
+            if (enrollment.studentName) displayParts.push(enrollment.studentName);
+            displayParts.push(enrollment.studentId);
+            if (enrollment.studentEmail) displayParts.push(enrollment.studentEmail);
+            studentSearchInput.value = displayParts.join(' · ');
+            studentSearchInput.disabled = true;
+            studentSearchInput.dataset.selected = 'true';
+          }
+          if (studentResults) {
+            studentResults.innerHTML = '';
+            studentResults.classList.remove('open');
+          }
+          if (helpText) {
+            helpText.textContent = 'Student selection is locked while editing the enrolment status.';
+          }
+        }
+      } else {
+        title.textContent = 'Add Student to Section';
+        form.dataset.mode = 'create';
+        delete form.dataset.id;
+        form.reset();
+        $('#enrollmentStatus').value = 'ENROLLED';
+        resetStudentSearchField();
+        if (helpText) {
+          helpText.textContent = 'Search and click each student to add them to the selection list below.';
+        }
+        if (helpText) {
+          helpText.classList.remove('text-red-600');
+        }
+        if (studentResults) {
+          setStudentResultsMessage('Loading students…');
+        }
+        try {
+          await ensureStudentDirectory();
+          renderStudentSearchResults('');
+          closeStudentResults();
+        } catch (error) {
+          console.error('Failed to load student list:', error);
+          setStudentResultsMessage(error.message || 'Unable to load students.');
+          if (helpText) {
+            helpText.textContent = 'Unable to load students. Please try again or refresh this page.';
+          }
+        }
+        if (studentSearchInput) {
+          studentSearchInput.disabled = false;
+          setTimeout(() => studentSearchInput.focus(), 100);
+        }
+      }
+      modal.setAttribute('open', '');
+    }
+
+    $('#addEnrollmentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const mode = e.target.dataset.mode;
+      const status = $('#enrollmentStatus').value;
+      showError('addEnrollmentFormError', '');
+
+      if (mode === 'edit') {
+        const studentId = ($('#studentId').value || '').trim();
+        if (!studentId) {
+          showError('addEnrollmentFormError', 'Please select a student before saving.');
+          return;
+        }
+        try {
+          const enrollmentId = e.target.dataset.id;
+          const enrol = enrollments.find(en => en.enrolmentId == enrollmentId);
+          if (!enrol) {
+            showError('addEnrollmentFormError', 'Enrollment not found in local state.');
+            return;
+          }
+          const sectionId = enrol.sectionId;
+          const response = await apiRequest(`${API_BASE_ENROLMENTS}/section/${sectionId}/student/${enrol.studentId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status })
+          });
+          if (response.success) {
+            toast('Enrollment updated successfully');
+            $('#addEnrollmentModal').removeAttribute('open');
+            viewEnrollments(currentSectionId);
+          } else {
+            showError('addEnrollmentFormError', response.message);
+          }
+        } catch (error) {
+          showError('addEnrollmentFormError', error.message);
+        }
+        return;
+      }
+
+      if (!selectedEnrollmentStudents.length) {
+        showError('addEnrollmentFormError', 'Select at least one student to add to this section.');
+        return;
+      }
+
+      const saveBtn = document.getElementById('addEnrollmentSaveBtn');
+      const originalText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+      const successes = [];
+      const failures = [];
+
+      try {
+        for (const student of selectedEnrollmentStudents) {
+          try {
+            const response = await apiRequest(`${API_BASE_ENROLMENTS}/section/${currentSectionId}/student/${student.id}`, {
+              method: 'POST',
+              body: JSON.stringify({ status })
+            });
+            if (!response.success) {
+              throw new Error(response.message || 'Failed to enroll student');
+            }
+            successes.push(student);
+          } catch (err) {
+            failures.push({ student, message: err.message || 'Unknown error' });
+          }
+        }
+
+        if (successes.length) {
+          successes.forEach(successStudent => removeSelectedStudent(successStudent.id));
+          toast(`${successes.length} student${successes.length === 1 ? '' : 's'} enrolled successfully`);
+          viewEnrollments(currentSectionId);
+        }
+
+        if (failures.length) {
+          const summary = failures.map(f => `${f.student.fullName || f.student.id}: ${f.message}`).join('\n');
+          showError('addEnrollmentFormError', `Unable to enroll ${failures.length} student(s):\n${summary}`);
+        } else {
+          showError('addEnrollmentFormError', '');
+          $('#addEnrollmentModal').removeAttribute('open');
+        }
+      } catch (error) {
+        showError('addEnrollmentFormError', error.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+        resetStudentSearchField();
+      }
+    });
+
+    $('#addEnrollmentCancelBtn').addEventListener('click', () => {
+      clearSelectedStudents();
+      resetStudentSearchField();
+      $('#addEnrollmentModal').removeAttribute('open');
+    });
+
+    async function removeEnrollment(studentId) {
+      if (confirm('Are you sure you want to remove this student from the section?')) {
+        try {
+          await apiRequest(`${API_BASE_ENROLMENTS}/section/${currentSectionId}/student/${studentId}`, { method: 'DELETE' });
+          toast('Student removed successfully');
+          viewEnrollments(currentSectionId);
+        } catch (error) {
+          toast('Failed to remove student: ' + error.message);
+        }
+      }
+    }
+
+    async function editEnrollment(enrollmentId) {
+      openAddEnrollmentModal(enrollmentId);
+    }
+
+    setupLogoutModal(async () => {
+      try {
+        await authRequest('/api/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error('Logout API error', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    window.addEventListener('load', async () => {
+      const currentUser = getLoggedInUser();
+      if (!currentUser) {
+        return;
+      }
+      initialiseUserInterface(currentUser);
+      if ((currentUser.role || '').toUpperCase() !== 'ADMIN') {
+        window.location.href = 'home.html';
+        return;
+      }
+      try {
+        await ensureStaffOptions();
+      } catch (error) {
+        console.warn('Failed to prefetch staff options:', error);
+      }
+      loadCourses();
+    });
+  </script>
+  <script>
+    (() => {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      const openBtn = document.getElementById('menuToggle');
+      const closeBtn = document.getElementById('closeSidebar');
+
+      function openMenu() {
+        sidebar.classList.add('open');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeMenu() {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      openBtn?.addEventListener('click', openMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      overlay?.addEventListener('click', closeMenu);
+    })();
+  </script>
+</body>
+
+</html>

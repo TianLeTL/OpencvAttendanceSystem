@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System - Manage attendance sessions">
+  <title>Sessions · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <script src="logout-modal.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce',
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0, 0, 0, 0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+            'brand': '0 4px 12px -2px rgba(59, 130, 246, 0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-in-up': 'slideInUp 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideInUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+
+    /* Custom date input styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop[open] {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(460px, 92vw);
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.18);
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    .modal-body {
+      padding: 16px 24px 24px;
+    }
+
+    .delete-modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .delete-modal-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #fee2e2;
+      color: #b91c1c;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .delete-modal-subtitle {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .delete-modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .delete-modal-message {
+      font-size: 0.95rem;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .delete-warning-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #92400e;
+    }
+
+    .delete-warning-box svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .delete-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px 20px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .delete-cancel-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #374151;
+      transition: background 0.2s ease, border 0.2s ease;
+    }
+
+    .delete-cancel-btn:hover {
+      background: #f3f4f6;
+      border-color: #cbd5f5;
+    }
+
+    .delete-confirm-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(180deg, #dc2626, #b91c1c);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.32);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .delete-confirm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(220, 38, 38, 0.35);
+    }
+
+    .delete-highlight {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .delete-id-tag {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 6px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1d4ed8;
+      background: #e0e7ff;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen gradient-light">
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden"
+    aria-hidden="true"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside id="sidebar"
+    class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+
+      <!-- Logo Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+              </path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar"
+          class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+            </path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="students.html" data-role="admin-only"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+          </svg>
+          <span>Students</span>
+        </a>
+
+        <a href="courses.html" data-role="admin-only"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+            </path>
+          </svg>
+          <span>Courses</span>
+        </a>
+
+        <a href="sessions.html"
+          class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl"
+          aria-current="page">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+
+        <a href="mark-attendance.html"
+          class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+            </path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only"
+            class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+              </path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- User Profile Footer -->
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn"
+            class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-64 min-h-screen">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex items-center justify-between px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle"
+            class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Sessions</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Manage attendance sessions and schedules</p>
+          </div>
+        </div>
+
+        <button id="createSessionBtn" data-role="session-manager"
+          class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white text-sm font-semibold rounded-lg shadow-brand transition-all duration-200 hover:shadow-lg hidden">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <span class="hidden sm:inline">Create Session</span>
+          <span class="sm:hidden">Create</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="p-4 md:p-8 space-y-6 animate-fade-in">
+
+      <!-- Filters and Search -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-soft p-4 md:p-6">
+        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+
+          <!-- Filter Tabs -->
+          <div class="flex flex-wrap gap-2" role="tablist" aria-label="Session filters">
+            <button id="filterToday"
+              class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-brand-50 text-brand-700 border-2 border-brand-200"
+              role="tab" aria-selected="true" data-bucket="today">
+              <span>Today</span>
+              <span id="countToday"
+                class="ml-2 px-2 py-0.5 text-xs font-semibold bg-brand-100 text-brand-800 rounded-full">0</span>
+            </button>
+            <button id="filterThisWeek"
+              class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-2 border-transparent"
+              role="tab" aria-selected="false" data-bucket="this-week">
+              <span>This Week</span>
+              <span id="countThisWeek"
+                class="ml-2 px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">0</span>
+            </button>
+            <button id="filterFinished"
+              class="filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-2 border-transparent"
+              role="tab" aria-selected="false" data-bucket="finished">
+              <span>Finished</span>
+              <span id="countFinished"
+                class="ml-2 px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">0</span>
+            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="w-full md:w-auto">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input type="search" id="searchInput"
+                class="w-full md:w-80 pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
+                placeholder="Search by course, section, or location..." autocomplete="off" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions Table -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+
+        <!-- Table Container with Horizontal Scroll -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Course</th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Section</th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Schedule</th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Location</th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Attendance
+                </th>
+                <th scope="col"
+                  class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sessionsTableBody" class="divide-y divide-gray-100">
+              <!-- Loading state -->
+              <tr id="loadingRow">
+                <td colspan="7" class="px-6 py-12">
+                  <div class="flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+                    <p class="mt-4 text-sm text-gray-600 font-medium">Loading sessions...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden px-6 py-12">
+          <div class="text-center">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No sessions found</h3>
+            <p class="text-sm text-gray-500 mb-6">Get started by creating your first attendance session</p>
+            <button data-role="session-manager" onclick="document.getElementById('createSessionBtn').click()"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors hidden">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                </path>
+              </svg>
+              Create Session
+            </button>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="hidden border-t border-gray-200 bg-gray-50 px-4 py-3 sm:px-6">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <button id="prevPageMobile"
+                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              <button id="nextPageMobile"
+                class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700">
+                  Showing <span class="font-medium" id="showingFrom">1</span> to <span class="font-medium"
+                    id="showingTo">10</span> of <span class="font-medium" id="totalCount">0</span> results
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                  <button id="prevPage"
+                    class="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="sr-only">Previous</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                  <div id="pageNumbers" class="relative inline-flex items-center"></div>
+                  <button id="nextPage"
+                    class="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="sr-only">Next</span>
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Create/Edit Session Modal -->
+  <div id="sessionModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+
+      <!-- Background overlay -->
+      <div class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+
+      <!-- Center modal -->
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+      <!-- Modal panel -->
+      <div
+        class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-soft-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full animate-scale-in">
+
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-white" id="modal-title">Create New Session</h3>
+            <button id="closeModalBtn" class="text-white/80 hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <form id="sessionForm" class="p-6 space-y-6">
+
+          <!-- Alert Messages -->
+          <div id="modalError" class="hidden p-4 bg-red-50 border border-red-200 text-red-800 text-sm rounded-lg"
+            role="alert">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p id="modalErrorText"></p>
+            </div>
+          </div>
+
+          <div id="modalWarning"
+            class="hidden p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm rounded-lg" role="alert">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                </path>
+              </svg>
+              <p id="modalWarningText"></p>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Course Selection -->
+            <div class="md:col-span-2">
+              <label for="courseSelect" class="block text-sm font-semibold text-gray-700 mb-2">Course <span
+                  class="text-red-500">*</span></label>
+              <select id="courseSelect" required aria-invalid="false" aria-describedby="courseSelect-error"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm">
+                <option value="">Select a course</option>
+              </select>
+              <p id="courseSelect-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- Section Selection -->
+            <div class="md:col-span-2">
+              <label for="sectionSelect" class="block text-sm font-semibold text-gray-700 mb-2">Section <span
+                  class="text-red-500">*</span></label>
+              <select id="sectionSelect" required aria-invalid="false" aria-describedby="sectionSelect-error" disabled
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm disabled:bg-gray-50 disabled:text-gray-500">
+                <option value="">Select a section</option>
+              </select>
+              <p id="sectionSelect-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- Session Date -->
+            <div>
+              <label for="sessionDate" class="block text-sm font-semibold text-gray-700 mb-2">Session Date <span
+                  class="text-red-500">*</span></label>
+              <input type="date" id="sessionDate" required aria-invalid="false" aria-describedby="sessionDate-error"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm" />
+              <p id="sessionDate-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- Location -->
+            <div>
+              <label for="locationInput" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+              <input type="text" id="locationInput" aria-invalid="false" aria-describedby="locationInput-error"
+                placeholder="e.g., Room 101, Lecture Hall A"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm" />
+              <p id="locationInput-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- Start Time -->
+            <div>
+              <label for="startTimeSelect" class="block text-sm font-semibold text-gray-700 mb-2">Start Time <span
+                  class="text-red-500">*</span></label>
+              <select id="startTimeSelect" required aria-invalid="false" aria-describedby="startTimeSelect-error"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm">
+                <option value="">Select start time</option>
+              </select>
+              <p id="startTimeSelect-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- End Time -->
+            <div>
+              <label for="endTimeSelect" class="block text-sm font-semibold text-gray-700 mb-2">End Time <span
+                  class="text-red-500">*</span></label>
+              <select id="endTimeSelect" required aria-invalid="false" aria-describedby="endTimeSelect-error"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm">
+                <option value="">Select end time</option>
+              </select>
+              <p id="endTimeSelect-error" class="hidden text-xs text-red-600 mt-2" role="alert"></p>
+            </div>
+
+            <!-- Late Threshold -->
+            <div class="md:col-span-2">
+              <label for="lateThreshold" class="block text-sm font-semibold text-gray-700 mb-2">Late Threshold
+                (minutes)</label>
+              <input type="number" id="lateThreshold" min="0" max="60" value="15"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all text-sm" />
+              <p class="mt-1 text-xs text-gray-500">Students arriving after this many minutes will be marked as late</p>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-200">
+            <button type="button" id="cancelModalBtn"
+              class="w-full sm:w-auto px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button type="submit" id="saveSessionBtn"
+              class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold rounded-lg shadow-brand transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+              <span id="saveSessionBtnText">Create Session</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Session Modal -->
+  <div id="sessionDeleteModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="sessionDeleteTitle" aria-describedby="sessionDeleteMessage">
+    <div class="modal-panel">
+      <div class="delete-modal-header">
+        <div class="delete-modal-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 9v3m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 5c-.77-1.333-2.694-1.333-3.464 0L4.34 17c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 id="sessionDeleteTitle" class="delete-modal-title">Delete Session</h3>
+          <p class="delete-modal-subtitle">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="modal-body delete-modal-body">
+        <p id="sessionDeleteMessage" class="delete-modal-message">Are you sure you want to delete this session?</p>
+        <div class="delete-warning-box">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
+          </svg>
+          <span>All attendance data captured for this session will be permanently removed.</span>
+        </div>
+      </div>
+      <div class="modal-actions delete-modal-actions">
+        <button type="button" id="sessionDeleteCancelBtn" class="delete-cancel-btn">Cancel</button>
+        <button type="button" id="sessionDeleteConfirmBtn" class="inline-flex items-center gap-2 delete-confirm-btn">
+          <svg id="sessionDeleteSpinner" class="hidden animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="sessionDeleteBtnText">Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== AUTHENTICATION & HELPERS ====================
+
+    let currentUser = null;
+    let userRole = 'ADMIN';
+    let canManageSessions = false;
+    let canTakeAttendance = false;
+    let pendingDeleteSessionId = null;
+    let lastSessionDeleteTrigger = null;
+    const sessionDeleteModal = document.getElementById('sessionDeleteModal');
+    const sessionDeleteMessage = document.getElementById('sessionDeleteMessage');
+    const sessionDeleteCancelBtn = document.getElementById('sessionDeleteCancelBtn');
+    const sessionDeleteConfirmBtn = document.getElementById('sessionDeleteConfirmBtn');
+    const sessionDeleteSpinner = document.getElementById('sessionDeleteSpinner');
+    const sessionDeleteBtnText = document.getElementById('sessionDeleteBtnText');
+
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    // ==================== AUTHENTICATION CHECK ====================
+
+    function checkAuth() {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        window.location.href = 'index.html';
+        return null;
+      }
+
+      try {
+        return JSON.parse(loggedInUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
+        return null;
+      }
+    }
+
+    // ==================== USER INTERFACE INITIALISATION ====================
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      userRole = (user.role || '').toUpperCase();
+      const isAdmin = userRole === 'ADMIN';
+      const isProfessor = userRole === 'PROFESSOR';
+      const isTeachingAssistant = userRole === 'TEACHING_ASSISTANT';
+      canManageSessions = isAdmin || isProfessor;
+      canTakeAttendance = canManageSessions || isTeachingAssistant;
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      updateRoleBasedElements(isAdmin);
+    }
+
+    function updateRoleBasedElements(isAdmin) {
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      document.querySelectorAll('[data-role="session-manager"]').forEach(el => {
+        if (canManageSessions) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      document.querySelectorAll('[data-role="attendance-staff"]').forEach(el => {
+        if (canTakeAttendance) {
+          el.classList.remove('hidden');
+          el.removeAttribute('aria-hidden');
+        } else {
+          el.classList.add('hidden');
+          el.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      if (createSessionBtn) {
+        if (canManageSessions) {
+          createSessionBtn.disabled = false;
+          createSessionBtn.removeAttribute('aria-disabled');
+        } else {
+          createSessionBtn.disabled = true;
+          createSessionBtn.setAttribute('aria-disabled', 'true');
+        }
+      }
+    }
+
+    // ==================== MOBILE MENU ====================
+
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function openMobileMenu() {
+      sidebar.classList.add('open');
+      mobileOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    closeSidebar.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeMobileMenu();
+        }
+      });
+    });
+
+    // ==================== LOGOUT FUNCTIONALITY ====================
+    setupLogoutModal(async () => {
+      try {
+        await authFetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.error('Logout API error:', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ==================== SESSIONS MANAGEMENT ====================
+
+    let allSessions = [];
+    let filteredSessions = [];
+    let currentBucket = 'today';
+    let searchTerm = '';
+    let currentPage = 1;
+    const PAGE_SIZE = 10;
+
+    // Time options generation
+    const TIME_STEP_MINUTES = 15;
+    const DEFAULT_SESSION_DURATION_MINUTES = 60;
+    const MAX_END_TIME = '22:15';
+    const MAX_START_TIME = '22:00';
+    const TIME_OPTIONS = generateTimeOptions(6, 22, TIME_STEP_MINUTES);
+    const MAX_END_MINUTES = timeStringToMinutes(MAX_END_TIME);
+    const MAX_START_MINUTES = timeStringToMinutes(MAX_START_TIME);
+    const END_TIME_OPTIONS = TIME_OPTIONS.filter(opt => timeStringToMinutes(opt.value) <= MAX_END_MINUTES);
+    const START_TIME_OPTIONS = END_TIME_OPTIONS.filter(opt => timeStringToMinutes(opt.value) <= MAX_START_MINUTES);
+    const DEFAULT_DURATION_SLOTS = DEFAULT_SESSION_DURATION_MINUTES / TIME_STEP_MINUTES;
+    const SINGAPORE_DATE_OPTIONS = {
+      timeZone: 'Asia/Singapore',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    };
+
+    function generateTimeOptions(startHour, endHour, stepMinutes) {
+      const options = [];
+      const startMinutes = startHour * 60;
+      const endMinutes = endHour * 60 + 45;
+
+      for (let minutes = startMinutes; minutes <= endMinutes; minutes += stepMinutes) {
+        const value = minutesToTimeString(minutes);
+        const label = formatTimeLabel(value);
+        options.push({ value, label });
+      }
+
+      return options;
+    }
+
+    function minutesToTimeString(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+
+    function timeStringToMinutes(timeString) {
+      if (!timeString || !timeString.includes(':')) return NaN;
+      const [hourStr, minuteStr] = timeString.split(':');
+      const hour = parseInt(hourStr, 10);
+      const minute = parseInt(minuteStr, 10);
+      return (hour * 60) + minute;
+    }
+
+    function getSingaporeDateString(date = new Date()) {
+      return date.toLocaleString('en-CA', SINGAPORE_DATE_OPTIONS).split(',')[0];
+    }
+
+    function hasFutureStartSlotToday() {
+      const now = new Date();
+      const currentMinutes = (now.getHours() * 60) + now.getMinutes();
+      return START_TIME_OPTIONS.some(opt => timeStringToMinutes(opt.value) >= currentMinutes + 15);
+    }
+
+    function formatTimeLabel(timeString) {
+      const [hourStr, minuteStr] = timeString.split(':');
+      const hour = parseInt(hourStr, 10);
+      const minute = parseInt(minuteStr, 10);
+      const suffix = hour >= 12 ? 'PM' : 'AM';
+      let displayHour = hour % 12;
+      if (displayHour === 0) displayHour = 12;
+      return `${displayHour}:${minuteStr} ${suffix}`;
+    }
+
+    function populateTimeSelect(selectElement, options = END_TIME_OPTIONS) {
+      const currentValue = selectElement.value;
+      selectElement.innerHTML = '<option value="">Select time</option>';
+
+      options.forEach(({ value, label }) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        selectElement.appendChild(option);
+      });
+
+      if (currentValue) {
+        selectElement.value = currentValue;
+      }
+    }
+
+    function findNextTimeSlot(currentValue, offset = 1, options = END_TIME_OPTIONS) {
+      const currentIndex = options.findIndex(opt => opt.value === currentValue);
+      if (currentIndex === -1) return null;
+
+      const nextIndex = currentIndex + offset;
+      return nextIndex < options.length ? options[nextIndex].value : null;
+    }
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      const formatterOptions = {
+        timeZone: 'Asia/Singapore',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      };
+      const formatDate = (date) => date.toLocaleString('en-CA', formatterOptions).split(',')[0];
+
+      const todayStr = formatDate(now);
+
+      if (sessionDateEl) {
+        sessionDateEl.min = todayStr;
+        sessionDateEl.value = todayStr;
+      }
+
+      const currentMinutes = (now.getHours() * 60) + now.getMinutes();
+      const nextSlot = START_TIME_OPTIONS.find(opt => timeStringToMinutes(opt.value) >= currentMinutes + 15) || null;
+
+      if (nextSlot) {
+        hideModalWarning();
+        if (startTimeSelectEl) {
+          startTimeSelectEl.value = nextSlot.value;
+        }
+        const endTime = findNextTimeSlot(nextSlot.value, DEFAULT_DURATION_SLOTS, END_TIME_OPTIONS)
+          || END_TIME_OPTIONS[END_TIME_OPTIONS.length - 1]?.value
+          || '';
+        if (endTimeSelectEl) {
+          endTimeSelectEl.value = endTime;
+        }
+      } else {
+        if (startTimeSelectEl) {
+          startTimeSelectEl.value = '';
+        }
+        if (endTimeSelectEl) {
+          endTimeSelectEl.value = '';
+        }
+        showModalWarning('No valid start times remain for today. Please pick a later date.');
+      }
+    }
+
+    // ==================== API FUNCTIONS ====================
+
+    async function apiRequest(url, options = {}) {
+      const response = await authFetch(url, options);
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+      if (!response.ok || !data) {
+        const message = data?.message || `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+      return data;
+    }
+
+    async function loadSessions() {
+      try {
+        const response = await apiRequest('/api/sessions');
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to load sessions');
+        }
+
+        allSessions = Array.isArray(response.data) ? response.data : [];
+        applyFilters();
+        updateBucketCounts();
+      } catch (error) {
+        console.error('Error loading sessions:', error);
+        showToast('Failed to load sessions: ' + error.message, 'error');
+        document.getElementById('loadingRow').innerHTML = `
+          <td colspan="7" class="px-6 py-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-red-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm text-gray-600 font-medium">Failed to load sessions</p>
+            <p class="text-xs text-gray-500 mt-1">${error.message}</p>
+            <button onclick="loadSessions()" class="mt-4 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">
+              Retry
+            </button>
+          </td>
+        `;
+      }
+    }
+
+    async function loadCourses() {
+      try {
+        const response = await apiRequest('/api/courses');
+
+        if (response.success && Array.isArray(response.data)) {
+          courseSelectEl.innerHTML = '<option value="">Select a course</option>';
+
+          response.data.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.courseId;
+            option.textContent = `${course.courseCode} — ${course.courseName}`;
+            courseSelectEl.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading courses:', error);
+        showToast('Failed to load courses', 'error');
+      }
+    }
+
+    async function loadSections(courseId) {
+      if (!courseId) {
+        sectionSelectEl.innerHTML = '<option value="">Select a section</option>';
+        sectionSelectEl.disabled = true;
+        return;
+      }
+
+      sectionSelectEl.disabled = true;
+      sectionSelectEl.innerHTML = '<option value="">Loading sections...</option>';
+
+      try {
+        const response = await apiRequest(`/api/sections/course/${courseId}`);
+
+        if (response.success && Array.isArray(response.data)) {
+          sectionSelectEl.innerHTML = '<option value="">Select a section</option>';
+
+          response.data.forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.sectionId;
+            option.textContent = section.sectionCode + (section.instructorName ? ` — ${section.instructorName}` : '');
+            sectionSelectEl.appendChild(option);
+          });
+
+          sectionSelectEl.disabled = false;
+          clearFieldError(sectionSelectEl);
+        } else {
+          throw new Error(response.message || 'Invalid response format');
+        }
+      } catch (error) {
+        console.error('Error loading sections:', error);
+        sectionSelectEl.innerHTML = '<option value="">Failed to load sections</option>';
+        showToast('Failed to load sections: ' + error.message, 'error');
+      }
+    }
+
+    async function createSession(formData) {
+      try {
+        const response = await apiRequest('/api/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create session');
+        }
+
+        if (response.data?.overlapDetected) {
+          showModalWarning('Warning: This session overlaps with an existing session for the same section');
+        }
+
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    async function startSession(sessionId) {
+      try {
+        const userId = currentUser?.userId || null;
+        const response = await apiRequest(`/api/sessions/${sessionId}/start`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId })
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to start session');
+        }
+
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    async function closeSession(sessionId) {
+      try {
+        const userId = currentUser?.userId || null;
+        const response = await apiRequest(`/api/sessions/${sessionId}/close`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId })
+        });
+
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to close session');
+        }
+
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    // ==================== FILTER AND SEARCH ====================
+
+    function applyFilters() {
+      // Filter by bucket
+      let bucketFiltered = allSessions.filter(session => {
+        const bucket = session.bucket || '';
+
+      if (currentBucket === 'today') {
+        return bucket === 'today';
+      } else if (currentBucket === 'this-week') {
+        return bucket === 'this-week';
+      } else if (currentBucket === 'finished') {
+        return bucket === 'finished';
+      }
+
+      return bucket !== 'finished';
+      });
+
+      // Filter by search term
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.trim().toLowerCase();
+        bucketFiltered = bucketFiltered.filter(session => {
+          const searchString = [
+            session.courseCode,
+            session.courseName,
+            session.sectionCode,
+            session.location
+          ].filter(Boolean).join(' ').toLowerCase();
+
+          return searchString.includes(searchLower);
+        });
+      }
+
+      filteredSessions = bucketFiltered;
+      currentPage = 1;
+      renderTable();
+    }
+
+    function updateBucketCounts() {
+      const counts = {
+        today: 0,
+        'this-week': 0,
+        finished: 0
+      };
+
+      allSessions.forEach(session => {
+        const bucket = session.bucket || '';
+        if (bucket === 'today') {
+          counts.today++;
+        } else if (bucket === 'this-week') {
+          counts['this-week']++;
+        } else if (bucket === 'finished') {
+          counts.finished++;
+        }
+      });
+
+      document.getElementById('countToday').textContent = counts.today;
+      document.getElementById('countThisWeek').textContent = counts['this-week'];
+      document.getElementById('countFinished').textContent = counts.finished;
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+
+    function renderTable() {
+      const tbody = document.getElementById('sessionsTableBody');
+      const loadingRow = document.getElementById('loadingRow');
+      const emptyState = document.getElementById('emptyState');
+
+      if (loadingRow) {
+        loadingRow.remove();
+      }
+
+      if (filteredSessions.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        document.getElementById('paginationContainer').classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      // Pagination
+      const totalPages = Math.ceil(filteredSessions.length / PAGE_SIZE);
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * PAGE_SIZE;
+      const endIndex = Math.min(startIndex + PAGE_SIZE, filteredSessions.length);
+      const visibleSessions = filteredSessions.slice(startIndex, endIndex);
+
+      // Render rows
+      tbody.innerHTML = visibleSessions.map(session => createSessionRow(session)).join('');
+
+      // Render pagination
+      renderPagination(totalPages, startIndex, endIndex);
+    }
+
+    function createSessionRow(session) {
+      const statusClass = getStatusClass(session.status);
+      const statusText = session.status || 'PENDING';
+
+      return `
+        <tr class="hover:bg-gray-50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="text-sm font-semibold text-gray-900">${escapeHtml(session.courseCode)}</div>
+            <div class="text-xs text-gray-500 mt-0.5">${escapeHtml(session.courseName)}</div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm font-medium text-gray-900">${escapeHtml(session.sectionCode)}</span>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-900">${formatScheduleDate(session.startDateTime)}</div>
+            <div class="text-xs text-gray-500 mt-0.5">${formatScheduleTime(session.startDateTime, session.endDateTime)}</div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-700">${escapeHtml(session.location || 'None')}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full ${statusClass}">
+              <span class="w-1.5 h-1.5 rounded-full ${getStatusDotClass(session.status)}"></span>
+              ${statusText}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            ${formatAttendance(session.attendanceSummary)}
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-end gap-2">
+              ${createActionButtons(session)}
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function getStatusClass(status) {
+      const statusUpper = (status || '').toUpperCase();
+      if (statusUpper === 'OPEN') return 'bg-green-50 text-green-700 border border-green-200';
+      if (statusUpper === 'CLOSED') return 'bg-gray-50 text-gray-700 border border-gray-200';
+      return 'bg-blue-50 text-blue-700 border border-blue-200';
+    }
+
+    function getStatusDotClass(status) {
+      const statusUpper = (status || '').toUpperCase();
+      if (statusUpper === 'OPEN') return 'bg-green-500';
+      if (statusUpper === 'CLOSED') return 'bg-gray-400';
+      return 'bg-blue-500';
+    }
+
+    function formatScheduleDate(dateTimeStr) {
+      if (!dateTimeStr) return '—';
+      const date = new Date(dateTimeStr.replace(' ', 'T'));
+      return date.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function formatScheduleTime(startStr, endStr) {
+      if (!startStr || !endStr) return '—';
+      const start = new Date(startStr.replace(' ', 'T'));
+      const end = new Date(endStr.replace(' ', 'T'));
+
+      const startTime = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const endTime = end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+      return `${startTime} – ${endTime}`;
+    }
+
+    function formatAttendance(summary) {
+      if (!summary) return '<span class="text-sm text-gray-400">—</span>';
+
+      const total = summary.rosterCount || 0;
+      const attended = (summary.presentCount || 0) + (summary.lateCount || 0);
+      const recorded = summary.recordedCount || 0;
+
+      if (total === 0) {
+        return '<span class="text-sm text-gray-400">No roster</span>';
+      }
+
+      const percentage = total > 0 ? Math.round((attended / total) * 100) : 0;
+
+      return `
+        <div class="text-sm">
+          <span class="font-semibold text-gray-900">${attended}</span>
+          <span class="text-gray-500">/ ${total}</span>
+          <span class="text-xs text-gray-400 ml-1">(${percentage}%)</span>
+        </div>
+        <div class="text-xs text-gray-500 mt-0.5">${recorded} recorded</div>
+      `;
+    }
+
+    function formatDateTimeDisplay(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return date.toLocaleString('en-GB', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+    }
+
+    function createActionButtons(session) {
+      const buttons = [];
+
+      buttons.push(`
+        <a href="session-view.html?id=${session.sessionId}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          View
+        </a>
+      `);
+
+      if (canManageSessions && session.status === 'PENDING') {
+        if (session.canStart) {
+          buttons.push(`
+            <button onclick="handleStartSession(${session.sessionId})" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-brand-500 border border-brand-500 rounded-lg hover:bg-brand-600 transition-colors">
+              Start
+            </button>
+          `);
+        } else {
+          const availableText = formatDateTimeDisplay(session.startWindowOpensAt);
+          const message = availableText
+            ? `Start available from ${availableText}`
+            : 'Start available 15 minutes before the scheduled time.';
+          buttons.push(`
+            <button class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded-lg cursor-not-allowed opacity-70" title="${escapeHtml(message)}" disabled>
+              Start
+            </button>
+          `);
+        }
+      }
+
+      if (canTakeAttendance && session.status === 'OPEN') {
+        buttons.push(`
+          <a href="mark-attendance.html?sessionId=${session.sessionId}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-green-500 border border-green-500 rounded-lg hover:bg-green-600 transition-colors">
+            Mark
+          </a>
+        `);
+      }
+
+      if (canManageSessions && session.canClose) {
+        buttons.push(`
+          <button onclick="handleCloseSession(${session.sessionId})" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-red-500 border border-red-500 rounded-lg hover:bg-red-600 transition-colors">
+            Close
+          </button>
+        `);
+      }
+
+      if (canManageSessions && session.status === 'CLOSED') {
+        buttons.push(`
+          <button onclick="handleDeleteSession(${session.sessionId}, this)" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors">
+            Delete
+          </button>
+        `);
+      }
+
+      return buttons.join('');
+    }
+
+    function renderPagination(totalPages, startIndex, endIndex) {
+      const container = document.getElementById('paginationContainer');
+
+      if (totalPages <= 1) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+
+      // Update showing text
+      document.getElementById('showingFrom').textContent = startIndex + 1;
+      document.getElementById('showingTo').textContent = endIndex;
+      document.getElementById('totalCount').textContent = filteredSessions.length;
+
+      // Update buttons
+      const prevBtn = document.getElementById('prevPage');
+      const nextBtn = document.getElementById('nextPage');
+      const prevBtnMobile = document.getElementById('prevPageMobile');
+      const nextBtnMobile = document.getElementById('nextPageMobile');
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+      prevBtnMobile.disabled = currentPage === 1;
+      nextBtnMobile.disabled = currentPage === totalPages;
+
+      // Render page numbers
+      const pageNumbers = document.getElementById('pageNumbers');
+      pageNumbers.innerHTML = '';
+
+      const maxVisible = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+      if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${i === currentPage
+            ? 'z-10 bg-brand-50 border-brand-500 text-brand-600'
+            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+          }`;
+        button.onclick = () => {
+          currentPage = i;
+          renderTable();
+        };
+        pageNumbers.appendChild(button);
+      }
+    }
+
+    // ==================== SESSION ACTIONS ====================
+
+    async function handleStartSession(sessionId) {
+      if (!canManageSessions) {
+        showToast('Only administrators or professors can start sessions.', 'warning');
+        return;
+      }
+      if (!confirm('Are you sure you want to start this session?')) {
+        return;
+      }
+
+      try {
+        await startSession(sessionId);
+        showToast('Session started successfully', 'success');
+        await loadSessions();
+      } catch (error) {
+        console.error('Error starting session:', error);
+        showToast('Failed to start session: ' + error.message, 'error');
+      }
+    }
+
+    async function handleCloseSession(sessionId) {
+      if (!canManageSessions) {
+        showToast('Only administrators or professors can close sessions.', 'warning');
+        return;
+      }
+      if (!confirm('Are you sure you want to close this session? This will mark all unmarked students as absent.')) {
+        return;
+      }
+
+      try {
+        await closeSession(sessionId);
+        showToast('Session closed successfully', 'success');
+        await loadSessions();
+      } catch (error) {
+        console.error('Error closing session:', error);
+        showToast('Failed to close session: ' + error.message, 'error');
+      }
+    }
+
+    function handleDeleteSession(sessionId, triggerBtn) {
+      if (!canManageSessions) {
+        showToast('Only administrators or professors can delete sessions.', 'warning');
+        return;
+      }
+      const numericId = Number(sessionId);
+      const session =
+        allSessions.find(s => Number(s.sessionId) === numericId) ||
+        filteredSessions.find(s => Number(s.sessionId) === numericId);
+
+      openSessionDeleteModal(session ?? { sessionId: numericId }, triggerBtn);
+    }
+
+    function openSessionDeleteModal(session, triggerBtn) {
+      pendingDeleteSessionId = session?.sessionId ?? null;
+      lastSessionDeleteTrigger = triggerBtn || null;
+
+      const safeCourse = session?.courseCode ? escapeHtml(session.courseCode) : '';
+      const safeSection = session?.sectionCode ? escapeHtml(session.sectionCode) : '';
+      const safeDate = session?.startDateTime ? escapeHtml(formatScheduleDate(session.startDateTime)) : '';
+
+      let highlightHtml = '<span class="delete-highlight">this session</span>';
+      if (safeCourse && safeSection) {
+        highlightHtml = `<span class="delete-highlight">${safeCourse}</span><span class="delete-id-tag">${safeSection}</span>`;
+      } else if (safeCourse) {
+        highlightHtml = `<span class="delete-highlight">${safeCourse}</span>`;
+      } else if (safeSection) {
+        highlightHtml = `<span class="delete-highlight">${safeSection}</span>`;
+      }
+
+      const dateSuffix = safeDate ? ` scheduled on <span class="delete-highlight">${safeDate}</span>` : '';
+
+      sessionDeleteMessage.innerHTML = `You&rsquo;re about to permanently delete ${highlightHtml}${dateSuffix}.`;
+      sessionDeleteModal.setAttribute('open', '');
+      sessionDeleteConfirmBtn.focus();
+    }
+
+    function closeSessionDeleteModal() {
+      sessionDeleteModal.removeAttribute('open');
+      setSessionDeleteLoading(false);
+      pendingDeleteSessionId = null;
+      if (lastSessionDeleteTrigger) {
+        lastSessionDeleteTrigger.focus();
+        lastSessionDeleteTrigger = null;
+      }
+    }
+
+    function setSessionDeleteLoading(loading) {
+      if (loading) {
+        sessionDeleteConfirmBtn.disabled = true;
+        sessionDeleteCancelBtn.disabled = true;
+        sessionDeleteSpinner.classList.remove('hidden');
+        sessionDeleteBtnText.textContent = 'Deleting...';
+      } else {
+        sessionDeleteConfirmBtn.disabled = false;
+        sessionDeleteCancelBtn.disabled = false;
+        sessionDeleteSpinner.classList.add('hidden');
+        sessionDeleteBtnText.textContent = 'Delete';
+      }
+    }
+
+    async function deleteSessionById(sessionId) {
+      const response = await apiRequest(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to delete session');
+      }
+    }
+
+    sessionDeleteCancelBtn.addEventListener('click', closeSessionDeleteModal);
+
+    sessionDeleteModal.addEventListener('click', (e) => {
+      if (e.target === sessionDeleteModal) {
+        closeSessionDeleteModal();
+      }
+    });
+
+    sessionDeleteConfirmBtn.addEventListener('click', async () => {
+      if (!pendingDeleteSessionId) return;
+      setSessionDeleteLoading(true);
+      try {
+        await deleteSessionById(pendingDeleteSessionId);
+        showToast('Session deleted successfully', 'success');
+        closeSessionDeleteModal();
+        await loadSessions();
+      } catch (error) {
+        console.error('Error deleting session:', error);
+        showToast(error.message || 'Failed to delete session', 'error');
+        setSessionDeleteLoading(false);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sessionDeleteModal.hasAttribute('open')) {
+        closeSessionDeleteModal();
+      }
+    });
+
+    // ==================== MODAL MANAGEMENT ====================
+
+    const sessionModal = document.getElementById('sessionModal');
+    const sessionForm = document.getElementById('sessionForm');
+    const createSessionBtn = document.getElementById('createSessionBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
+
+    const courseSelectEl = document.getElementById('courseSelect');
+    const sectionSelectEl = document.getElementById('sectionSelect');
+    const sessionDateEl = document.getElementById('sessionDate');
+    const locationInputEl = document.getElementById('locationInput');
+    const startTimeSelectEl = document.getElementById('startTimeSelect');
+    const endTimeSelectEl = document.getElementById('endTimeSelect');
+    const lateThresholdEl = document.getElementById('lateThreshold');
+
+    function combineDateAndTime(dateString, timeString) {
+      if (!dateString || !timeString) return null;
+      const [year, month, day] = dateString.split('-').map(Number);
+      const [hour, minute] = timeString.split(':').map(Number);
+      if ([year, month, day, hour, minute].some(value => Number.isNaN(value))) {
+        return null;
+      }
+      return new Date(year, month - 1, day, hour, minute, 0, 0);
+    }
+
+    function showFieldError(field, message) {
+      if (!field) return;
+      const errorEl = document.getElementById(`${field.id}-error`);
+      field.setAttribute('aria-invalid', 'true');
+      field.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+      field.classList.remove('border-gray-300', 'focus:ring-brand-500', 'focus:border-brand-500');
+      if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA') {
+        field.classList.add('bg-red-50');
+      }
+      if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+      }
+    }
+
+    function clearFieldError(field) {
+      if (!field) return;
+      const errorEl = document.getElementById(`${field.id}-error`);
+      field.setAttribute('aria-invalid', 'false');
+      field.classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500', 'bg-red-50');
+      field.classList.add('border-gray-300', 'focus:ring-brand-500', 'focus:border-brand-500');
+      if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+      }
+    }
+
+    function resetSessionFormValidation() {
+      [courseSelectEl, sectionSelectEl, sessionDateEl, locationInputEl, startTimeSelectEl, endTimeSelectEl].forEach(clearFieldError);
+    }
+
+    function validateCourseField() {
+      if (!courseSelectEl.value) {
+        showFieldError(courseSelectEl, 'Please select a course');
+        return false;
+      }
+      clearFieldError(courseSelectEl);
+      return true;
+    }
+
+    function validateSectionField() {
+      if (sectionSelectEl.disabled) {
+        showFieldError(sectionSelectEl, 'Sections are still loading');
+        return false;
+      }
+      if (!sectionSelectEl.value) {
+        showFieldError(sectionSelectEl, 'Please select a section');
+        return false;
+      }
+      clearFieldError(sectionSelectEl);
+      return true;
+    }
+
+    function validateSessionDateField() {
+      const value = sessionDateEl.value;
+      if (!value) {
+        showFieldError(sessionDateEl, 'Please select a session date');
+        return false;
+      }
+      const today = getSingaporeDateString();
+      if (value < today) {
+        showFieldError(sessionDateEl, 'Session date cannot be in the past');
+        return false;
+      }
+      clearFieldError(sessionDateEl);
+      return true;
+    }
+
+    function validateLocationField() {
+      if (!locationInputEl) return true;
+      const value = locationInputEl.value.trim();
+      if (!value) {
+        clearFieldError(locationInputEl);
+        return true;
+      }
+      clearFieldError(locationInputEl);
+      return true;
+    }
+
+    function validateTimeFields() {
+      const start = startTimeSelectEl.value;
+      const end = endTimeSelectEl.value;
+
+      if (!start) {
+        showFieldError(startTimeSelectEl, 'Please select a start time');
+        return { valid: false, focusField: startTimeSelectEl };
+      }
+      clearFieldError(startTimeSelectEl);
+
+      if (!end) {
+        showFieldError(endTimeSelectEl, 'Please select an end time');
+        return { valid: false, focusField: endTimeSelectEl };
+      }
+
+      if (end <= start) {
+        showFieldError(endTimeSelectEl, 'End time must be after start time');
+        return { valid: false, focusField: endTimeSelectEl };
+      }
+
+      const futureValidation = validateScheduleFutureGuard(start, end);
+      if (!futureValidation.valid) {
+        return futureValidation;
+      }
+
+      clearFieldError(endTimeSelectEl);
+      return { valid: true };
+    }
+
+    function validateScheduleFutureGuard(start, end) {
+      const dateValue = sessionDateEl.value;
+      if (!dateValue) {
+        return { valid: true };
+      }
+
+      const now = new Date();
+      const startDateTime = combineDateAndTime(dateValue, start);
+      const endDateTime = combineDateAndTime(dateValue, end);
+
+      if (startDateTime && startDateTime < now) {
+        showFieldError(startTimeSelectEl, 'Start time must be later than the current time');
+        return { valid: false, focusField: startTimeSelectEl };
+      }
+
+      if (endDateTime && endDateTime <= now) {
+        showFieldError(endTimeSelectEl, 'End time must be later than the current time');
+        return { valid: false, focusField: endTimeSelectEl };
+      }
+
+      return { valid: true };
+    }
+
+    function openModal() {
+      if (!canManageSessions) {
+        return;
+      }
+      sessionModal.classList.remove('hidden');
+      sessionForm.reset();
+      hideModalError();
+      hideModalWarning();
+      resetSessionFormValidation();
+
+      sectionSelectEl.disabled = true;
+      sectionSelectEl.innerHTML = '<option value="">Select a section</option>';
+
+      populateTimeSelect(startTimeSelectEl, START_TIME_OPTIONS);
+      populateTimeSelect(endTimeSelectEl, END_TIME_OPTIONS);
+      setDefaultDateTime();
+
+      loadCourses();
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      sessionModal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function showModalError(message) {
+      const errorDiv = document.getElementById('modalError');
+      const errorText = document.getElementById('modalErrorText');
+      errorText.textContent = message;
+      errorDiv.classList.remove('hidden');
+    }
+
+    function hideModalError() {
+      document.getElementById('modalError').classList.add('hidden');
+    }
+
+    function showModalWarning(message) {
+      const warningDiv = document.getElementById('modalWarning');
+      const warningText = document.getElementById('modalWarningText');
+      warningText.textContent = message;
+      warningDiv.classList.remove('hidden');
+    }
+
+    function hideModalWarning() {
+      document.getElementById('modalWarning').classList.add('hidden');
+    }
+
+    createSessionBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+
+    // Close modal on background click
+    sessionModal.addEventListener('click', (e) => {
+      if (e.target === sessionModal) {
+        closeModal();
+      }
+    });
+
+    // ==================== FORM HANDLING ====================
+
+    courseSelectEl.addEventListener('change', (e) => {
+      const courseId = parseInt(e.target.value, 10);
+      if (courseId) {
+        validateCourseField();
+        loadSections(courseId);
+      } else {
+        showFieldError(courseSelectEl, 'Please select a course');
+        sectionSelectEl.innerHTML = '<option value="">Select a section</option>';
+        sectionSelectEl.disabled = true;
+        clearFieldError(sectionSelectEl);
+      }
+      sectionSelectEl.value = '';
+    });
+
+    sectionSelectEl.addEventListener('change', () => {
+      if (sectionSelectEl.value) {
+        clearFieldError(sectionSelectEl);
+      } else if (!sectionSelectEl.disabled) {
+        showFieldError(sectionSelectEl, 'Please select a section');
+      }
+    });
+
+    sessionDateEl.addEventListener('change', () => {
+      validateSessionDateField();
+      const today = getSingaporeDateString();
+      if (sessionDateEl.value && sessionDateEl.value !== today) {
+        hideModalWarning();
+      } else if (sessionDateEl.value === today) {
+        if (hasFutureStartSlotToday()) {
+          hideModalWarning();
+        } else {
+          showModalWarning('No valid start times remain for today. Please pick a later date.');
+        }
+      }
+      if (startTimeSelectEl.value || endTimeSelectEl.value) {
+        validateTimeFields();
+      }
+    });
+
+    startTimeSelectEl.addEventListener('change', (e) => {
+      const startTime = e.target.value;
+      if (!startTime) {
+        validateTimeFields();
+        return;
+      }
+
+      if (!endTimeSelectEl.value) {
+        const suggestedEnd =
+          findNextTimeSlot(startTime, DEFAULT_DURATION_SLOTS, END_TIME_OPTIONS) ||
+          findNextTimeSlot(startTime, 1, END_TIME_OPTIONS);
+        if (suggestedEnd) {
+          endTimeSelectEl.value = suggestedEnd;
+        }
+      } else if (endTimeSelectEl.value <= startTime) {
+        const suggestedEnd =
+          findNextTimeSlot(startTime, DEFAULT_DURATION_SLOTS, END_TIME_OPTIONS) ||
+          findNextTimeSlot(startTime, 1, END_TIME_OPTIONS) ||
+          END_TIME_OPTIONS[END_TIME_OPTIONS.length - 1]?.value;
+        if (suggestedEnd) {
+          endTimeSelectEl.value = suggestedEnd;
+        }
+      }
+
+      validateTimeFields();
+    });
+
+    endTimeSelectEl.addEventListener('change', () => {
+      validateTimeFields();
+    });
+
+    if (locationInputEl) {
+      locationInputEl.addEventListener('blur', validateLocationField);
+    }
+
+    sessionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      hideModalError();
+      hideModalWarning();
+
+      let firstInvalidField = null;
+
+      const courseValid = validateCourseField();
+      if (!courseValid) {
+        firstInvalidField = courseSelectEl;
+      }
+
+      let sectionValid = true;
+      if (courseValid) {
+        sectionValid = validateSectionField();
+        if (!sectionValid && !firstInvalidField) {
+          firstInvalidField = sectionSelectEl;
+        }
+      } else {
+        clearFieldError(sectionSelectEl);
+      }
+
+      const dateValid = validateSessionDateField();
+      if (!dateValid && !firstInvalidField) {
+        firstInvalidField = sessionDateEl;
+      }
+
+      const timeValidation = validateTimeFields();
+      if (!timeValidation.valid && !firstInvalidField) {
+        firstInvalidField = timeValidation.focusField || startTimeSelectEl;
+      }
+
+      const locationValid = validateLocationField();
+      if (!locationValid && !firstInvalidField) {
+        firstInvalidField = locationInputEl;
+      }
+
+      if (firstInvalidField) {
+        firstInvalidField.focus({ preventScroll: true });
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveSessionBtn');
+      const saveBtnText = document.getElementById('saveSessionBtnText');
+      const originalText = saveBtnText.textContent;
+
+      saveBtn.disabled = true;
+      saveBtnText.textContent = 'Creating...';
+
+      try {
+        const sectionId = parseInt(sectionSelectEl.value, 10);
+        const sessionDate = sessionDateEl.value;
+        const startTime = startTimeSelectEl.value;
+        const endTime = endTimeSelectEl.value;
+        const location = locationInputEl.value.trim();
+        const lateThreshold = parseInt(lateThresholdEl.value, 10) || 15;
+
+        const formData = {
+          sectionId,
+          sessionDate,
+          startTime,
+          endTime,
+          location,
+          lateThresholdMinutes: lateThreshold,
+          createdByUserId: currentUser?.userId || null
+        };
+
+        const response = await createSession(formData);
+
+        showToast('Session created successfully', 'success');
+        closeModal();
+
+        // Switch to the appropriate bucket
+        const bucket = response.data?.bucket;
+        if (bucket && ['today', 'this-week', 'finished'].includes(bucket)) {
+          currentBucket = bucket === 'upcoming' ? 'this-week' : bucket;
+          updateFilterTabs();
+        }
+
+        await loadSessions();
+      } catch (error) {
+        console.error('Error creating session:', error);
+        showModalError(error.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtnText.textContent = originalText;
+      }
+    });
+
+    // ==================== FILTER TABS ====================
+
+    const filterTabs = document.querySelectorAll('.filter-tab');
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const bucket = tab.dataset.bucket;
+        if (bucket === currentBucket) return;
+
+        currentBucket = bucket;
+        updateFilterTabs();
+        applyFilters();
+      });
+    });
+
+    function updateFilterTabs() {
+      filterTabs.forEach(tab => {
+        const isActive = tab.dataset.bucket === currentBucket;
+
+        if (isActive) {
+          tab.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-brand-50 text-brand-700 border-2 border-brand-200';
+          tab.setAttribute('aria-selected', 'true');
+        } else {
+          tab.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-2 border-transparent';
+          tab.setAttribute('aria-selected', 'false');
+        }
+      });
+    }
+
+    // ==================== SEARCH ====================
+
+    const searchInput = document.getElementById('searchInput');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchTerm = e.target.value;
+        applyFilters();
+      }, 300);
+    });
+
+    // ==================== PAGINATION BUTTONS ====================
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredSessions.length / PAGE_SIZE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    });
+
+    document.getElementById('prevPageMobile').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    });
+
+    document.getElementById('nextPageMobile').addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredSessions.length / PAGE_SIZE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    });
+
+    // ==================== UTILITY FUNCTIONS ====================
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      // Simple alert for now - can be replaced with a proper toast library
+      alert(message);
+    }
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+
+    document.addEventListener('keydown', (e) => {
+      // ESC to close modals
+      if (e.key === 'Escape') {
+        if (!sessionModal.classList.contains('hidden')) {
+          closeModal();
+        }
+        if (sidebar.classList.contains('open')) {
+          closeMobileMenu();
+        }
+      }
+
+      // Ctrl/Cmd + K to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+      }
+
+      // Ctrl/Cmd + N to create new session
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        openModal();
+      }
+    });
+
+    // ==================== INITIALISATION ====================
+
+    window.addEventListener('load', async () => {
+      // Check authentication
+      currentUser = checkAuth();
+      if (!currentUser) return;
+
+      // Initialise user interface
+      initialiseUserInterface(currentUser);
+
+      // Load sessions
+      await loadSessions();
+    });
+  </script>
+</body>
+
+</html>

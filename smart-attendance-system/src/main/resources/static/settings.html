@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System Settings - Manage recognition and audit logging policies">
+  <title>Settings · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a'
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce'
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif']
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0, 0, 0, 0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+            'brand': '0 4px 12px -2px rgba(59, 130, 246, 0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)'
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-in-left': 'slideInLeft 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideInLeft: {
+              '0%': { transform: 'translateX(-100%)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' }
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen gradient-light">
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden" aria-hidden="true"></div>
+
+  <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar" class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors" aria-label="Close menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="students.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <span>Students</span>
+        </a>
+        <a href="courses.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <span>Courses</span>
+        </a>
+        <a href="sessions.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+        <a href="mark-attendance.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only" class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl" aria-current="page">
+            <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="md:ml-64 min-h-screen">
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex flex-wrap items-center justify-between gap-4 px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Open menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">System Settings</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Fine-tune recognition and audit logging policies</p>
+          </div>
+        </div>
+        <div class="text-sm text-right">
+          <span id="statusBadge" class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse" aria-hidden="true"></span>
+            Loading settings…
+          </span>
+          <p id="lastUpdatedText" class="text-xs text-gray-500 mt-1">Awaiting latest values</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-4 md:p-8 space-y-6 animate-fade-in">
+      <div id="alertContainer" class="hidden"></div>
+
+      <section class="max-w-5xl mx-auto space-y-6">
+        <form id="settingsForm" class="space-y-6">
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-5">
+            <div class="flex flex-wrap items-start gap-4 justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Recognition confidence</h3>
+                <p class="text-sm text-gray-600">Set the minimum match score required before the system records attendance automatically.</p>
+              </div>
+              <span id="thresholdSummary" class="inline-flex items-center px-3 py-1 text-sm font-semibold bg-brand-50 text-brand-700 border border-brand-200 rounded-full">85%</span>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <label class="space-y-2">
+                <span class="text-sm font-medium text-gray-700">Confidence threshold (%)</span>
+                <input type="number" id="recognitionThreshold" name="recognitionThreshold" min="0" max="100" step="0.1" class="w-full rounded-xl border border-gray-200 bg-gray-25 px-4 py-3 text-sm text-gray-900 focus:border-brand-400 focus:ring focus:ring-brand-200/60" placeholder="85">
+                <p class="text-xs text-gray-500">Recommended: 80–90%. Lower values may raise false positives, higher values may require more manual reviews.</p>
+              </label>
+              <label class="space-y-2">
+                <span class="text-sm font-medium text-gray-700">Manual verification trigger</span>
+                <div class="rounded-xl border border-gray-200 bg-gray-25 p-4 text-sm text-gray-600">
+                  <p>Faces below this score join the manual review queue so that staff can confirm attendance without delaying the session.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+
+          <div class="bg-white border border-gray-200 rounded-2xl shadow-soft p-6 space-y-5">
+            <div class="flex flex-wrap items-start gap-4 justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">Audit logging</h3>
+                <p class="text-sm text-gray-600">Choose where the attendance audit log is written so that support teams can trace overrides and recognition decisions.</p>
+              </div>
+              <span id="logPathBadge" class="inline-flex items-center px-3 py-1 text-sm font-semibold bg-gray-50 text-gray-700 border border-gray-200 rounded-full truncate max-w-[16rem]">
+                logs/attendance.log
+              </span>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <label class="space-y-2 md:col-span-2">
+                <span class="text-sm font-medium text-gray-700">Attendance log path</span>
+                <input type="text" id="attendanceLogPath" name="attendanceLogPath" class="w-full rounded-xl border border-gray-200 bg-gray-25 px-4 py-3 text-sm text-gray-900 focus:border-brand-400 focus:ring focus:ring-brand-200/60" placeholder="logs/attendance.log">
+                <p class="text-xs text-gray-500">Use an absolute path for network drives or keep within <code class="font-mono text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">logs/</code> for local storage. The system rotates files daily and retains 30 days.</p>
+              </label>
+              <div class="md:col-span-2 rounded-2xl border border-brand-100 bg-brand-50/60 p-4">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-brand-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  <div class="text-sm text-gray-700">
+                    <p class="font-medium text-gray-900">What gets written</p>
+                    <p class="mt-1 text-gray-600">Session creation, enrolment changes, recognition matches and overrides, late adjustments, and manual attendance edits are appended in near real-time.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-3">
+            <button type="submit" id="saveBtn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-brand transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+              <svg id="saveSpinner" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span id="saveBtnText">Save changes</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    const API_URL = '/api/settings/recognition';
+
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const response = await fetch(url, { ...options, headers });
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    (function enforceAdminOnlyPage() {
+      const raw = sessionStorage.getItem('loggedInUser');
+      if (!raw) {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        const user = JSON.parse(raw);
+        if ((user.role || '').toUpperCase() !== 'ADMIN') {
+          window.location.href = 'error.html';
+        }
+      } catch (error) {
+        console.error('Failed to parse logged-in user', error);
+        window.location.href = 'index.html';
+      }
+    })();
+
+    let currentUser = null;
+    let lastLoadedAt = null;
+
+    const form = document.getElementById('settingsForm');
+    const recognitionThresholdInput = document.getElementById('recognitionThreshold');
+    const thresholdSummary = document.getElementById('thresholdSummary');
+    const attendanceLogPathInput = document.getElementById('attendanceLogPath');
+    const logPathBadge = document.getElementById('logPathBadge');
+    const alertContainer = document.getElementById('alertContainer');
+    const saveBtn = document.getElementById('saveBtn');
+    const saveBtnText = document.getElementById('saveBtnText');
+    const saveSpinner = document.getElementById('saveSpinner');
+    const statusBadge = document.getElementById('statusBadge');
+    const lastUpdatedText = document.getElementById('lastUpdatedText');
+
+    function checkAuth() {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      try {
+        return JSON.parse(loggedInUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
+        return null;
+      }
+    }
+
+    function initialiseUserInterface(user) {
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(part => part[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || '').toUpperCase();
+      const isAdmin = role === 'ADMIN';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdmin) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    function openMobileMenu() {
+      sidebar.classList.add('open');
+      mobileOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebarBtn = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    closeSidebarBtn.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeMobileMenu();
+        }
+      });
+    });
+
+    setupLogoutModal(async () => {
+      try {
+        await authFetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      } catch (error) {
+        console.error('Logout API error:', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    function setStatus(text, variant = 'info') {
+      const baseClasses = 'inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold border rounded-full';
+      const variants = {
+        info: 'text-blue-700 bg-blue-50 border-blue-200',
+        success: 'text-green-700 bg-green-50 border-green-200',
+        warning: 'text-amber-700 bg-amber-50 border-amber-200',
+        neutral: 'text-gray-600 bg-gray-50 border-gray-200'
+      };
+      statusBadge.className = `${baseClasses} ${variants[variant] || variants.info}`;
+      statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full ${variant === 'success' ? 'bg-green-500' : variant === 'warning' ? 'bg-amber-500' : 'bg-blue-500'} animate-pulse" aria-hidden="true"></span>${text}`;
+    }
+
+    function updateLastUpdated(timestamp) {
+      if (!timestamp) {
+        lastUpdatedText.textContent = 'Awaiting latest values';
+        return;
+      }
+      const formatted = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeStyle: 'short' }).format(timestamp);
+      lastUpdatedText.textContent = `Last updated ${formatted}`;
+    }
+
+    function showAlert(message, type = 'success') {
+      const styles = {
+        success: 'bg-green-50 border border-green-200 text-green-800',
+        error: 'bg-red-50 border border-red-200 text-red-800',
+        warning: 'bg-amber-50 border border-amber-200 text-amber-800',
+        info: 'bg-blue-50 border border-blue-200 text-blue-800'
+      };
+      const icons = {
+        success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />',
+        info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+      };
+      alertContainer.className = `rounded-2xl px-4 py-3 shadow-soft flex items-start gap-3 animate-fade-in ${styles[type] || styles.success}`;
+      alertContainer.innerHTML = `
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          ${icons[type] || icons.success}
+        </svg>
+        <span class="text-sm font-medium">${message}</span>
+      `;
+      alertContainer.classList.remove('hidden');
+    }
+
+    function clearAlert() {
+      alertContainer.classList.add('hidden');
+      alertContainer.innerHTML = '';
+    }
+
+    function disableForm(disabled) {
+      [recognitionThresholdInput, attendanceLogPathInput, saveBtn].forEach(el => {
+        el.disabled = disabled;
+      });
+      if (disabled) {
+        saveBtn.classList.add('cursor-progress');
+      } else {
+        saveBtn.classList.remove('cursor-progress');
+      }
+    }
+
+    function parseSettingsResponse(payload = {}) {
+      const threshold = Number.parseFloat(payload.recognition_threshold ?? payload.recognitionThreshold ?? 85);
+      const path = (payload.attendance_log_path ?? payload.attendanceLogPath ?? 'logs/attendance.log').toString();
+
+      return {
+        recognitionThreshold: Number.isFinite(threshold) ? Number(threshold.toFixed(2)) : 85,
+        attendanceLogPath: path.trim() || 'logs/attendance.log'
+      };
+    }
+
+    function populateForm(values) {
+      recognitionThresholdInput.value = values.recognitionThreshold;
+      attendanceLogPathInput.value = values.attendanceLogPath;
+
+      thresholdSummary.textContent = `${values.recognitionThreshold}%`;
+      logPathBadge.textContent = values.attendanceLogPath;
+    }
+
+    function handleFieldUpdates() {
+      const threshold = recognitionThresholdInput.value;
+      if (threshold) {
+        thresholdSummary.textContent = `${threshold}%`;
+      }
+      const logPath = attendanceLogPathInput.value.trim();
+      if (logPath) {
+        logPathBadge.textContent = logPath;
+      }
+    }
+
+    recognitionThresholdInput.addEventListener('input', handleFieldUpdates);
+    attendanceLogPathInput.addEventListener('input', handleFieldUpdates);
+
+    async function loadSettings() {
+      try {
+        disableForm(true);
+        clearAlert();
+        setStatus('Fetching latest values…', 'info');
+
+        const response = await authFetch(API_URL);
+        if (!response.ok) {
+          throw new Error(`Failed to load settings (HTTP ${response.status})`);
+        }
+        const data = await response.json();
+        const parsed = parseSettingsResponse(data);
+        populateForm(parsed);
+        lastLoadedAt = new Date();
+        updateLastUpdated(lastLoadedAt);
+        setStatus('Settings are up to date', 'success');
+      } catch (error) {
+        console.error('Failed to load settings', error);
+        showAlert(error.message || 'Unable to load settings.', 'error');
+        setStatus('Unable to load settings', 'warning');
+      } finally {
+        disableForm(false);
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearAlert();
+
+      const recognitionThreshold = Number.parseFloat(recognitionThresholdInput.value);
+      const attendanceLogPath = attendanceLogPathInput.value.trim();
+
+      if (!Number.isFinite(recognitionThreshold) || recognitionThreshold < 0 || recognitionThreshold > 100) {
+        showAlert('Recognition threshold must be between 0 and 100.', 'error');
+        recognitionThresholdInput.focus();
+        return;
+      }
+
+      if (!attendanceLogPath) {
+        showAlert('Attendance log path cannot be blank.', 'error');
+        attendanceLogPathInput.focus();
+        return;
+      }
+
+      const payload = {
+        recognitionThreshold,
+        attendanceLogPath
+      };
+
+      try {
+        disableForm(true);
+        saveSpinner.classList.remove('hidden');
+        saveBtnText.textContent = 'Saving…';
+        setStatus('Saving changes…', 'info');
+
+        const response = await authFetch(API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}));
+          const message = errorBody?.message || `Failed to save settings (HTTP ${response.status})`;
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        const parsed = parseSettingsResponse(data);
+        populateForm(parsed);
+        lastLoadedAt = new Date();
+        updateLastUpdated(lastLoadedAt);
+        setStatus('Settings saved successfully', 'success');
+        showAlert('Settings saved successfully.', 'success');
+      } catch (error) {
+        console.error('Failed to save settings', error);
+        showAlert(error.message || 'Unable to save settings.', 'error');
+        setStatus('Save failed', 'warning');
+      } finally {
+        disableForm(false);
+        saveSpinner.classList.add('hidden');
+        saveBtnText.textContent = 'Save changes';
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && sidebar.classList.contains('open')) {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener('load', async () => {
+      currentUser = checkAuth();
+      if (!currentUser) {
+        return;
+      }
+      initialiseUserInterface(currentUser);
+
+      const role = (currentUser.role || '').toUpperCase();
+      if (role !== 'ADMIN') {
+        disableForm(true);
+        setStatus('Access restricted', 'warning');
+        showAlert('Only administrators can manage recognition settings.', 'error');
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1800);
+        return;
+      }
+
+      await loadSettings();
+    });
+  </script>
+</body>
+</html>

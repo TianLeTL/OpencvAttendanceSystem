@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to Smart Attendance System - Intelligent attendance management platform">
+  <title>Sign In · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // Primary brand colours - Blue spectrum
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            // Accent colours - Purple spectrum
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce',
+            },
+            // Neutral light palette
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0, 0, 0, 0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+            'brand': '0 4px 12px -2px rgba(59, 130, 246, 0.15)',
+            'brand-lg': '0 10px 30px -5px rgba(59, 130, 246, 0.2)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'pulse-gentle': 'pulseGentle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shimmer': 'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            pulseGentle: {
+              '0%, 100%': { opacity: '0.6' },
+              '50%': { opacity: '0.8' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-1000px 0' },
+              '100%': { backgroundPosition: '1000px 0' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    /* Smooth focus styles */
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    /* Subtle gradient background */
+    .gradient-light {
+      background: linear-gradient(135deg, #ffffff 0%, #f9fafb 50%, #eff6ff 100%);
+    }
+
+    /* Input autofill styling */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+      -webkit-text-fill-color: #111827;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      border: 2px solid rgba(59, 130, 246, 0.1);
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Shimmer effect for loading states */
+    .shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      background-size: 1000px 100%;
+    }
+
+    /* Screen reader only class */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen gradient-light flex items-center justify-center p-4 overflow-x-hidden">
+  
+  <!-- Decorative background elements -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <!-- Top right gradient orb -->
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-100/60 rounded-full blur-3xl animate-pulse-gentle"></div>
+    
+    <!-- Bottom left gradient orb -->
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-100/60 rounded-full blur-3xl animate-pulse-gentle" style="animation-delay: 1.5s;"></div>
+    
+    <!-- Center accent -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-brand-50/80 to-accent-50/80 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Main login card -->
+  <div class="relative w-full max-w-xl animate-slide-up">
+    <div class="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-[32px] shadow-soft-xl overflow-hidden">
+      <div class="p-10 pb-8">
+        <!-- Header section with logo -->
+        <div class="flex items-start gap-4 mb-8">
+          <!-- Brand logo with gradient and shadow -->
+          <div class="relative flex-shrink-0 group">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-500 to-accent-500 rounded-2xl blur-sm opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+            <div class="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand transform group-hover:scale-105 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Header text -->
+          <div class="flex-1 min-w-0">
+            <h1 class="text-2xl font-bold text-gray-900 mb-1 tracking-tight">
+              Welcome Back
+            </h1>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Sign in to access Smart Attendance System
+            </p>
+          </div>
+        </div>
+
+        <!-- Alert message -->
+        <div id="alert" class="hidden mb-6 p-4 rounded-xl border animate-fade-in" role="alert" aria-live="assertive">
+          <div class="flex items-start gap-3">
+            <svg id="alertIcon" class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span id="alertText" class="text-sm font-medium flex-1"></span>
+          </div>
+        </div>
+
+        <!-- Login form -->
+        <form id="loginForm" class="space-y-5" novalidate>
+          
+          <!-- Username or Email field -->
+          <div class="space-y-2">
+            <label for="usernameOrEmail" class="block text-sm font-semibold text-gray-700">
+              Username or Email Address
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="usernameOrEmail" 
+                name="usernameOrEmail"
+                required
+                autocomplete="username"
+                aria-required="true"
+                aria-invalid="false"
+                aria-describedby="usernameOrEmail-error"
+                class="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 shadow-soft"
+                placeholder="Enter your username or email"
+              >
+            </div>
+            <p id="usernameOrEmail-error" class="hidden text-xs text-red-600 mt-1.5 ml-1" role="alert"></p>
+          </div>
+
+          <!-- Password field -->
+          <div class="space-y-2">
+            <label for="password" class="block text-sm font-semibold text-gray-700">
+              Password
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <input 
+                type="password" 
+                id="password" 
+                name="password"
+                required
+                autocomplete="current-password"
+                aria-required="true"
+                aria-invalid="false"
+                aria-describedby="password-error"
+                class="w-full pl-12 pr-12 py-3.5 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 shadow-soft"
+                placeholder="Enter your password"
+              >
+              <button 
+                type="button" 
+                id="togglePassword"
+                aria-label="Toggle password visibility"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              >
+                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+            </div>
+            <p id="password-error" class="hidden text-xs text-red-600 mt-1.5 ml-1" role="alert"></p>
+          </div>
+
+          <!-- Submit button -->
+          <button 
+            type="submit" 
+            id="submitBtn"
+            class="group relative w-full py-3.5 px-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold rounded-xl shadow-brand transition-all duration-200 transform hover:scale-[1.02] hover:shadow-brand-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none overflow-hidden"
+          >
+            <!-- Button shimmer effect -->
+            <div class="absolute inset-0 shimmer animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <!-- Button content -->
+            <span class="relative flex items-center justify-center gap-2">
+              <span id="btnText">Sign In</span>
+              <svg id="btnArrow" class="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+              <div id="btnSpinner" class="hidden spinner"></div>
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Footer section -->
+      <div class="px-10 py-6 bg-gray-50/50 border-t border-gray-100">
+        <p class="text-sm text-center text-gray-600">
+          Need access? Request an invite link from your system administrator.
+        </p>
+      </div>
+    </div>
+
+    <!-- Subtle bottom accent line -->
+    <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-brand-400/30 to-transparent rounded-full blur-sm"></div>
+  </div>
+
+  <script>
+    // ==================== INITIALISATION ====================
+    
+    // Check if user is already logged in
+    window.addEventListener('load', () => {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (loggedInUser) {
+        window.location.href = 'home.html';
+      }
+    });
+
+    // ==================== DOM ELEMENTS ====================
+    
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnArrow = document.getElementById('btnArrow');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const alertBox = document.getElementById('alert');
+    const alertIcon = document.getElementById('alertIcon');
+    const alertText = document.getElementById('alertText');
+    const usernameOrEmailInput = document.getElementById('usernameOrEmail');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    // ==================== ALERT MANAGEMENT ====================
+    
+    /**
+     * Display an alert message with appropriate styling
+     * @param {string} message - The message to display
+     * @param {string} type - 'error' or 'success'
+     */
+    function showAlert(message, type = 'error') {
+      alertText.textContent = message;
+      
+      if (type === 'error') {
+        alertBox.className = 'mb-6 p-4 rounded-xl border animate-fade-in bg-red-50 border-red-200 text-red-700';
+        alertIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        `;
+      } else {
+        alertBox.className = 'mb-6 p-4 rounded-xl border animate-fade-in bg-green-50 border-green-200 text-green-700';
+        alertIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        `;
+      }
+      
+      alertBox.classList.remove('hidden');
+      
+      // Scroll to alert for accessibility
+      alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /**
+     * Hide the alert message
+     */
+    function hideAlert() {
+      alertBox.classList.add('hidden');
+    }
+
+    // ==================== FORM VALIDATION ====================
+    
+    /**
+     * Validate username or email input
+     * @param {string} value - The input value
+     * @returns {Object} - {isValid: boolean, message: string}
+     */
+    function validateUsernameOrEmail(value) {
+      if (!value || value.trim() === '') {
+        return { isValid: false, message: 'Username or email is required' };
+      }
+      
+      if (value.length < 3) {
+        return { isValid: false, message: 'Username or email must be at least 3 characters' };
+      }
+      
+      return { isValid: true, message: '' };
+    }
+
+    /**
+     * Validate password input
+     * @param {string} value - The input value
+     * @returns {Object} - {isValid: boolean, message: string}
+     */
+    function validatePassword(value) {
+      if (!value || value.trim() === '') {
+        return { isValid: false, message: 'Password is required' };
+      }
+      
+      if (value.length < 8) {
+        return { isValid: false, message: 'Password must be at least 8 characters' };
+      }
+      
+      return { isValid: true, message: '' };
+    }
+
+    /**
+     * Show field error message
+     * @param {HTMLElement} input - The input element
+     * @param {string} message - The error message
+     */
+    function showFieldError(input, message) {
+      const errorElement = document.getElementById(`${input.id}-error`);
+      input.setAttribute('aria-invalid', 'true');
+      input.classList.add('border-red-300', 'focus:ring-red-500', 'bg-red-50');
+      input.classList.remove('border-gray-200', 'focus:ring-brand-500', 'bg-white');
+      
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+      }
+    }
+
+    /**
+     * Clear field error message
+     * @param {HTMLElement} input - The input element
+     */
+    function clearFieldError(input) {
+      const errorElement = document.getElementById(`${input.id}-error`);
+      input.setAttribute('aria-invalid', 'false');
+      input.classList.remove('border-red-300', 'focus:ring-red-500', 'bg-red-50');
+      input.classList.add('border-gray-200', 'focus:ring-brand-500', 'bg-white');
+      
+      if (errorElement) {
+        errorElement.classList.add('hidden');
+      }
+    }
+
+    // Real-time validation on blur
+    usernameOrEmailInput.addEventListener('blur', () => {
+      const validation = validateUsernameOrEmail(usernameOrEmailInput.value);
+      if (!validation.isValid) {
+        showFieldError(usernameOrEmailInput, validation.message);
+      }
+    });
+
+    usernameOrEmailInput.addEventListener('input', () => {
+      clearFieldError(usernameOrEmailInput);
+    });
+
+    passwordInput.addEventListener('blur', () => {
+      const validation = validatePassword(passwordInput.value);
+      if (!validation.isValid) {
+        showFieldError(passwordInput, validation.message);
+      }
+    });
+
+    passwordInput.addEventListener('input', () => {
+      clearFieldError(passwordInput);
+    });
+
+    // ==================== PASSWORD VISIBILITY TOGGLE ====================
+    
+    let passwordVisible = false;
+
+    togglePasswordBtn.addEventListener('click', () => {
+      passwordVisible = !passwordVisible;
+      passwordInput.type = passwordVisible ? 'text' : 'password';
+      togglePasswordBtn.setAttribute('aria-label', passwordVisible ? 'Hide password' : 'Show password');
+      
+      eyeIcon.innerHTML = passwordVisible
+        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+    });
+
+    // ==================== LOADING STATE MANAGEMENT ====================
+    
+    /**
+     * Set the loading state of the form
+     * @param {boolean} loading - Whether the form is loading
+     */
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      usernameOrEmailInput.disabled = loading;
+      passwordInput.disabled = loading;
+      togglePasswordBtn.disabled = loading;
+      
+      if (loading) {
+        btnText.textContent = 'Signing In';
+        btnArrow.classList.add('hidden');
+        btnSpinner.classList.remove('hidden');
+        submitBtn.classList.add('cursor-wait');
+      } else {
+        btnText.textContent = 'Sign In';
+        btnArrow.classList.remove('hidden');
+        btnSpinner.classList.add('hidden');
+        submitBtn.classList.remove('cursor-wait');
+      }
+    }
+
+    // ==================== FORM SUBMISSION ====================
+    
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert();
+      
+      // Clear previous field errors
+      clearFieldError(usernameOrEmailInput);
+      clearFieldError(passwordInput);
+
+      // Get form values
+      const usernameOrEmail = usernameOrEmailInput.value.trim();
+      const password = passwordInput.value;
+
+      // Validate inputs
+      const usernameValidation = validateUsernameOrEmail(usernameOrEmail);
+      const passwordValidation = validatePassword(password);
+      
+      let hasError = false;
+
+      if (!usernameValidation.isValid) {
+        showFieldError(usernameOrEmailInput, usernameValidation.message);
+        hasError = true;
+      }
+
+      if (!passwordValidation.isValid) {
+        showFieldError(passwordInput, passwordValidation.message);
+        hasError = true;
+      }
+
+      if (hasError) {
+        showAlert('Please correct the errors in the form');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ usernameOrEmail, password })
+        });
+
+        let result = null;
+        try {
+          result = await response.json();
+        } catch {
+          result = null;
+        }
+
+        if (!response.ok || !result || result.success === false) {
+          const message = result?.message || (response.status === 401
+            ? 'Invalid username/email or password.'
+            : 'Unable to sign in. Please try again.');
+          showAlert(message);
+          sessionStorage.removeItem('authToken');
+          passwordInput.value = '';
+          passwordInput.focus();
+          setLoading(false);
+          return;
+        }
+
+        if (result.success) {
+          // Store user data and auth token in session storage
+          sessionStorage.setItem('loggedInUser', JSON.stringify(result.data));
+          const token = btoa(`${usernameOrEmail}:${password}`);
+          sessionStorage.setItem('authToken', token);
+          
+          // Show success message
+          showAlert('Sign in successful! Redirecting to dashboard...', 'success');
+          
+          // Redirect after a short delay
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1000);
+        } else {
+          // Handle authentication failure
+          showAlert(result.message || 'Invalid credentials. Please check your username and password.');
+          
+          // Clear password field for security
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showAlert('Unable to connect to the server. Please check your connection and try again.');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // ==================== KEYBOARD NAVIGATION ====================
+    
+    // Allow Enter key to submit form from any input
+    usernameOrEmailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        passwordInput.focus();
+      }
+    });
+
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        loginForm.requestSubmit();
+      }
+    });
+
+    // ==================== ACCESSIBILITY ENHANCEMENTS ====================
+    
+    // Announce form submission state to screen readers
+    const announcer = document.createElement('div');
+    announcer.setAttribute('role', 'status');
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.className = 'sr-only';
+    document.body.appendChild(announcer);
+
+    // Update announcer when loading state changes
+    const originalSetLoading = setLoading;
+    setLoading = function(loading) {
+      originalSetLoading(loading);
+      announcer.textContent = loading ? 'Signing in, please wait' : '';
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Attendance System Dashboard - Manage students, courses, and attendance tracking">
+  <title>Dashboard · Smart Attendance System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7e22ce',
+            },
+            gray: {
+              25: '#fcfcfd',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
+            'soft-md': '0 4px 12px 0 rgba(0, 0, 0, 0.07)',
+            'soft-lg': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+            'soft-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.12)',
+            'brand': '0 4px 12px -2px rgba(59, 130, 246, 0.15)',
+            'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-in-right': 'slideInRight 0.3s ease-out',
+            'slide-in-left': 'slideInLeft 0.3s ease-out',
+            'scale-in': 'scaleIn 0.2s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideInRight: {
+              '0%': { transform: 'translateX(100%)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' },
+            },
+            slideInLeft: {
+              '0%': { transform: 'translateX(-100%)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' },
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.9)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f3f4f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+
+    *:focus {
+      outline: none;
+    }
+
+    *:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .gradient-light {
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(96, 165, 250, 0.25) 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 55%),
+        linear-gradient(135deg, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+    }
+
+    .nav-link {
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(to right, #eff6ff, #f3f4f6);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-action-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .quick-action-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.2);
+    }
+
+    .quick-action-card:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen gradient-light">
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden md:hidden" aria-hidden="true"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-soft-lg z-50 transition-transform duration-300 ease-in-out">
+    <div class="flex flex-col h-full">
+      
+      <!-- Logo Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shadow-brand">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-gray-900">Smart Attendance</h1>
+            <p class="text-xs text-gray-500">Management System</p>
+          </div>
+        </div>
+        <button id="closeSidebar" class="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 overflow-y-auto p-4 space-y-1" aria-label="Main navigation">
+        <a href="home.html" class="nav-link active flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-900 rounded-xl" aria-current="page">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="students.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <span>Students</span>
+        </a>
+
+        <a href="courses.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          <span>Courses</span>
+        </a>
+
+        <a href="sessions.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>Sessions</span>
+        </a>
+
+        <a href="mark-attendance.html" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>Mark Attendance</span>
+        </a>
+
+        <div class="pt-4 mt-4 border-t border-gray-200">
+          <a href="settings.html" data-role="admin-only" class="nav-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- User Profile Footer -->
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-accent-400 flex items-center justify-center text-white font-semibold text-sm">
+            <span id="userInitials">U</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-900 truncate" id="userName">User</p>
+            <p class="text-xs text-gray-500 truncate" id="userEmail">user@example.com</p>
+          </div>
+          <button id="logoutBtn" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" aria-label="Sign out">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="md:ml-64 min-h-screen">
+    
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200 shadow-soft">
+      <div class="flex items-center justify-between px-4 md:px-8 py-4">
+        <div class="flex items-center gap-4">
+          <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h2>
+            <p class="text-sm text-gray-500 hidden sm:block">Welcome back, <span id="welcomeName">User</span></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2"></div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="p-4 md:p-8 space-y-8 animate-fade-in">
+      
+      <!-- Statistics Cards -->
+      <section id="statsSection" data-role="admin-only" aria-labelledby="stats-heading">
+        <h3 id="stats-heading" class="sr-only">System Statistics</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          
+          <!-- Total Students Card -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Total Students</p>
+            <p class="text-3xl font-bold text-gray-900" id="totalStudents">—</p>
+          </div>
+
+          <!-- Active Courses Card -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-accent-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Active</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Active Courses</p>
+            <p class="text-3xl font-bold text-gray-900" id="totalCourses">—</p>
+          </div>
+
+          <!-- Today's Sessions Card -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">Today</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Today's Sessions</p>
+            <p class="text-3xl font-bold text-gray-900" id="todaySessions">—</p>
+          </div>
+
+          <!-- Attendance Rate Card -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">High</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Attendance Rate</p>
+            <p class="text-3xl font-bold text-gray-900">92<span class="text-lg text-gray-500">%</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Staff Overview Cards -->
+      <section id="staffStatsSection" data-role="staff-only" class="hidden" aria-labelledby="staff-stats-heading">
+        <h3 id="staff-stats-heading" class="sr-only">My Teaching Overview</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+          <!-- Sessions Today -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">Today</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Sessions Today</p>
+            <p class="text-3xl font-bold text-gray-900" id="staffTodaySessionsCount">—</p>
+          </div>
+
+          <!-- Upcoming Within 7 Days -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.567-3 3.5S10.343 15 12 15s3-1.567 3-3.5S13.657 8 12 8zm0 0V5m0 13v-3m4.712-1.712l2.122 2.122M7.288 9.288 5.166 7.166M16.95 7.05 19.071 4.93M4.929 19.071l2.121-2.121"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Next 7 Days</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Upcoming Sessions</p>
+            <p class="text-3xl font-bold text-gray-900" id="staffUpcomingSessionsCount">—</p>
+          </div>
+
+          <!-- Open Sessions -->
+          <div class="stat-card bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Live</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Open Sessions</p>
+            <p class="text-3xl font-bold text-gray-900" id="staffOpenSessionsCount">—</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Staff Quick Actions -->
+      <section id="staffQuickActionsSection" data-role="staff-only" class="hidden" aria-labelledby="staff-quick-actions-heading">
+        <h3 id="staff-quick-actions-heading" class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+        <div id="staffQuickActionsGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- Today's Sessions (Staff) -->
+      <section id="staffTodaySection" data-role="staff-only" class="hidden">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-bold text-gray-900">Today's Sessions</h3>
+              <p class="text-xs text-gray-500 mt-1" id="staffTodaySubtitle">Sessions scheduled for today</p>
+            </div>
+            <a href="sessions.html" class="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
+              View all
+            </a>
+          </div>
+          <div id="todaySessionsList" class="divide-y divide-gray-100">
+            <div class="px-6 py-12 text-center">
+              <div class="inline-block w-8 h-8 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+              <p class="mt-4 text-sm text-gray-500">Loading today's sessions...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions -->
+      <section id="quickActionsSection" data-role="admin-only" aria-labelledby="quick-actions-heading">
+        <h3 id="quick-actions-heading" class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <!-- Add Student Action -->
+          <a href="students.html" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:border-brand-300">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-brand group-hover:shadow-lg transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-brand-600 transition-colors">Add Student</h4>
+                <p class="text-sm text-gray-600">Register a new student with face recognition training</p>
+              </div>
+            </div>
+          </a>
+
+          <!-- Create Session Action -->
+          <a href="sessions.html" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:border-accent-300">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center shadow-brand group-hover:shadow-lg transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-accent-600 transition-colors">Create Session</h4>
+                <p class="text-sm text-gray-600">Schedule a new attendance session for a course</p>
+              </div>
+            </div>
+          </a>
+
+          <!-- Mark Attendance Action -->
+          <a href="mark-attendance.html" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:border-green-300">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-brand group-hover:shadow-lg transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-green-600 transition-colors">Mark Attendance</h4>
+                <p class="text-sm text-gray-600">Start live face recognition for attendance tracking</p>
+              </div>
+            </div>
+          </a>
+
+          <!-- Manage Courses Action -->
+          <a href="courses.html" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:border-blue-300">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-brand group-hover:shadow-lg transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">Manage Courses</h4>
+                <p class="text-sm text-gray-600">View and manage course catalogue and sections</p>
+              </div>
+            </div>
+          </a>
+
+          <!-- System Settings Action -->
+          <a href="settings.html" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:border-gray-300">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-soft group-hover:shadow-md transition-shadow">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors">System Settings</h4>
+                <p class="text-sm text-gray-600">Configure recognition settings and preferences</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Recent Activity -->
+      <section aria-labelledby="recent-activity-heading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Upcoming Sessions -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 id="recent-activity-heading" class="text-base font-bold text-gray-900">Upcoming Sessions</h3>
+            <a href="sessions.html" class="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">View All</a>
+          </div>
+          <div id="upcomingSessionsList" class="divide-y divide-gray-100">
+            <!-- Loading state -->
+            <div class="px-6 py-12 text-center">
+              <div class="inline-block w-8 h-8 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+              <p class="mt-4 text-sm text-gray-500">Loading sessions...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-soft overflow-hidden" data-role="admin-only" id="systemHealthCard">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-base font-bold text-gray-900">System Health</h3>
+          </div>
+          <div class="p-6 space-y-4">
+            
+            <!-- API Status -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-sm font-medium text-gray-700">API Server</span>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Online</span>
+            </div>
+
+            <!-- Database Status -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-sm font-medium text-gray-700">Database</span>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Connected</span>
+            </div>
+
+            <!-- Recognition Service -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-sm font-medium text-gray-700">Face Recognition</span>
+              </div>
+              <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Ready</span>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100">
+              <div class="text-xs text-gray-500 space-y-1">
+                <div class="flex justify-between">
+                  <span>Uptime</span>
+                  <span class="font-medium text-gray-700">99.9%</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Last Backup</span>
+                  <span class="font-medium text-gray-700">2 hours ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="logout-modal.js"></script>
+  <script>
+    // ==================== AUTHENTICATION CHECK ====================
+    
+    let currentUser = null;
+    let userRole = 'ADMIN';
+    let isAdminUser = true;
+    let isProfessorUser = false;
+    let isTeachingAssistantUser = false;
+
+    function getAuthToken() {
+      return sessionStorage.getItem('authToken');
+    }
+
+    function handleUnauthorized() {
+      sessionStorage.removeItem('authToken');
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = 'index.html';
+    }
+
+    async function authFetch(url, options = {}) {
+      const token = getAuthToken();
+      if (!token) {
+        handleUnauthorized();
+        throw new Error('Missing authentication token');
+      }
+
+      const headers = new Headers(options.headers || {});
+      if (!(options.body instanceof FormData) && !headers.has('Content-Type') && options.method && options.method.toUpperCase() !== 'GET') {
+        headers.set('Content-Type', 'application/json');
+      }
+      if (!headers.has('Authorization')) {
+        headers.set('Authorization', `Basic ${token}`);
+      }
+
+      const fetchOptions = {
+        ...options,
+        headers
+      };
+
+      const response = await fetch(url, fetchOptions);
+      if (response.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      return response;
+    }
+
+    function checkAuth() {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (!loggedInUser) {
+        window.location.href = 'index.html';
+        return null;
+      }
+      
+      try {
+        return JSON.parse(loggedInUser);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'index.html';
+        return null;
+      }
+    }
+
+    // ==================== DATA HELPERS ====================
+    
+    let sessionsCache = null;
+    let sessionsCachePromise = null;
+
+    async function fetchSessionsData(force = false) {
+      if (!force && sessionsCache) {
+        return sessionsCache;
+      }
+      if (sessionsCachePromise) {
+        return sessionsCachePromise;
+      }
+      sessionsCachePromise = (async () => {
+        const response = await authFetch('/api/sessions');
+        if (!response.ok) {
+          throw new Error(`Failed to load sessions (HTTP ${response.status})`);
+        }
+        const result = await response.json();
+        if (!result.success || !Array.isArray(result.data)) {
+          throw new Error(result.message || 'Unexpected sessions response');
+        }
+        sessionsCache = result.data;
+        return sessionsCache;
+      })().finally(() => {
+        sessionsCachePromise = null;
+      });
+      return sessionsCachePromise;
+    }
+
+    function parseSessionDateTime(session) {
+      const dateStr = session.sessionDate || session.scheduledDate;
+      const timeStr = session.startTime || session.scheduledTime || '00:00';
+      if (!dateStr) return null;
+      return new Date(`${dateStr}T${timeStr}`);
+    }
+
+    function parseSessionEndDateTime(session) {
+      const dateStr = session.sessionDate || session.scheduledDate;
+      const timeStr = session.endTime || session.scheduledEndTime || session.scheduledTime || '00:00';
+      if (!dateStr) return null;
+      return new Date(`${dateStr}T${timeStr}`);
+    }
+
+    function formatLocalDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // ==================== USER INTERFACE INITIALISATION ====================
+    
+    function initialiseUserInterface(user) {
+      // Set user information
+      const fullName = user.fullName || user.username || 'User';
+      const email = user.email || '';
+      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      const role = (user.role || 'ADMIN').toUpperCase();
+      userRole = role;
+      isAdminUser = role === 'ADMIN';
+      isProfessorUser = role === 'PROFESSOR';
+      isTeachingAssistantUser = role === 'TEACHING_ASSISTANT';
+
+      document.getElementById('userName').textContent = fullName;
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userInitials').textContent = initials;
+      document.getElementById('welcomeName').textContent = fullName.split(' ')[0];
+      const roleBadge = document.getElementById('userRoleBadge');
+      if (roleBadge) {
+        roleBadge.textContent = role.replace('_', ' ');
+      }
+
+      document.querySelectorAll('[data-role="admin-only"]').forEach(el => {
+        if (isAdminUser) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      document.querySelectorAll('[data-role="staff-only"]').forEach(el => {
+        if (!isAdminUser) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      document.querySelectorAll('[data-role="professor-only"]').forEach(el => {
+        if (isProfessorUser) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      document.querySelectorAll('[data-role="ta-only"]').forEach(el => {
+        if (isTeachingAssistantUser) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+    }
+
+    // ==================== MOBILE MENU ====================
+    
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function openMobileMenu() {
+      sidebar.classList.add('open');
+      mobileOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      sidebar.classList.remove('open');
+      mobileOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openMobileMenu);
+    closeSidebar.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', closeMobileMenu);
+
+    // Close mobile menu on navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeMobileMenu();
+        }
+      });
+    });
+
+    // ==================== LOGOUT FUNCTIONALITY ====================
+    setupLogoutModal(async () => {
+      try {
+        await authFetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.error('Logout API error:', error);
+      } finally {
+        sessionStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('authToken');
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ==================== LOAD STATISTICS ====================
+    
+    async function loadStatistics() {
+      if (isAdminUser) {
+        return loadAdminStatistics();
+      }
+      return loadStaffStatistics();
+    }
+
+    async function loadAdminStatistics() {
+      try {
+        // Load total students
+        const studentsResponse = await authFetch('/api/students');
+        if (studentsResponse.ok) {
+          const studentsData = await studentsResponse.json();
+          if (studentsData.success && Array.isArray(studentsData.data)) {
+            document.getElementById('totalStudents').textContent = studentsData.data.length;
+          }
+        }
+
+        // Load total courses
+        const coursesResponse = await authFetch('/api/courses');
+        if (coursesResponse.ok) {
+          const coursesData = await coursesResponse.json();
+          if (coursesData.success && Array.isArray(coursesData.data)) {
+            document.getElementById('totalCourses').textContent = coursesData.data.length;
+          }
+        }
+
+        // Load today's sessions
+        const adminSessions = await fetchSessionsData();
+        const todayKey = new Date().toISOString().split('T')[0];
+        const adminToday = (adminSessions || []).filter(session => {
+          const dateStr = session.sessionDate || session.scheduledDate;
+          if (!dateStr) return false;
+          return dateStr === todayKey || dateStr.startsWith(todayKey);
+        });
+        document.getElementById('todaySessions').textContent = adminToday.length;
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        document.getElementById('totalStudents').textContent = '—';
+        document.getElementById('totalCourses').textContent = '—';
+        document.getElementById('todaySessions').textContent = '—';
+      }
+    }
+
+    async function loadStaffStatistics() {
+      const todayCountEl = document.getElementById('staffTodaySessionsCount');
+      const upcomingCountEl = document.getElementById('staffUpcomingSessionsCount');
+      const openCountEl = document.getElementById('staffOpenSessionsCount');
+
+      try {
+        const sessions = await fetchSessionsData();
+
+        const now = new Date();
+        const todayKey = formatLocalDateKey(now);
+        const sevenDaysAhead = new Date(now);
+        sevenDaysAhead.setDate(now.getDate() + 7);
+
+        const todaySessions = (sessions || []).filter(session => {
+          const dateStr = session.sessionDate || session.scheduledDate;
+          return dateStr && (dateStr === todayKey || dateStr.startsWith(todayKey));
+        });
+        const upcomingWithinWeek = (sessions || []).filter(session => {
+          const start = parseSessionDateTime(session);
+          if (!start) return false;
+          const startKey = formatLocalDateKey(start);
+          if (startKey === todayKey) return false;
+          return start >= now && start <= sevenDaysAhead;
+        });
+        const openSessions = (sessions || []).filter(session => (session.status || '').toUpperCase() === 'OPEN');
+
+        if (todayCountEl) todayCountEl.textContent = todaySessions.length;
+        if (upcomingCountEl) upcomingCountEl.textContent = upcomingWithinWeek.length;
+        if (openCountEl) openCountEl.textContent = openSessions.length;
+      } catch (error) {
+        console.error('Error loading staff statistics:', error);
+        if (todayCountEl) todayCountEl.textContent = '—';
+        if (upcomingCountEl) upcomingCountEl.textContent = '—';
+        if (openCountEl) openCountEl.textContent = '—';
+      }
+    }
+
+    // ==================== LOAD UPCOMING SESSIONS ====================
+    
+    async function loadUpcomingSessions() {
+      const container = document.getElementById('upcomingSessionsList');
+      if (!container) return;
+
+      try {
+        const sessions = await fetchSessionsData();
+        const now = new Date();
+        const todayKey = formatLocalDateKey(now);
+
+        const upcomingSessions = (sessions || [])
+          .map(session => ({
+            raw: session,
+            start: parseSessionDateTime(session)
+          }))
+          .filter(item => {
+            if (!item.start) return false;
+            const status = (item.raw.status || '').toUpperCase();
+            if (status === 'CLOSED') return false;
+            if (isAdminUser) {
+              return item.start >= now;
+            }
+            const startDateKey = formatLocalDateKey(item.start);
+            if (startDateKey === todayKey) {
+              return false;
+            }
+            return item.start > now;
+          })
+          .sort((a, b) => a.start - b.start)
+          .slice(0, 5);
+
+        if (upcomingSessions.length === 0) {
+          const actionLabel = isProfessorUser || isAdminUser ? 'Create Session' : 'View Sessions';
+          const actionHref = isProfessorUser || isAdminUser ? 'sessions.html' : 'sessions.html';
+          const actionColor = isProfessorUser || isAdminUser ? 'bg-brand-500 hover:bg-brand-600' : 'bg-gray-800 hover:bg-gray-900';
+          container.innerHTML = `
+            <div class="px-6 py-12 text-center">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <p class="text-sm text-gray-600 font-medium">No upcoming sessions</p>
+              <p class="text-xs text-gray-500 mt-1">${isProfessorUser || isAdminUser ? 'Schedule your next class session.' : 'You have no upcoming sessions assigned.'}</p>
+              <a href="${actionHref}" class="inline-block mt-4 px-4 py-2 ${actionColor} text-white text-sm font-medium rounded-lg transition-colors">
+                ${actionLabel}
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        const statusColors = {
+          'PENDING': 'bg-blue-50 text-blue-700 border-blue-200',
+          'OPEN': 'bg-green-50 text-green-700 border-green-200',
+          'CLOSED': 'bg-gray-50 text-gray-700 border-gray-200'
+        };
+
+        container.innerHTML = upcomingSessions.map(({ raw, start }) => {
+          const dateStr = start.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          const timeStr = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          const status = (raw.status || 'PENDING').toUpperCase();
+          const statusClass = statusColors[status] || statusColors['PENDING'];
+
+          return `
+            <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 text-center">
+                  <div class="w-12 h-12 rounded-xl bg-brand-50 flex flex-col items-center justify-center">
+                    <span class="text-xs font-medium text-brand-600">${dateStr.split(' ')[1]}</span>
+                    <span class="text-lg font-bold text-brand-700">${dateStr.split(' ')[0]}</span>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-1">
+                    ${raw.courseName || 'Course Session'} · ${raw.sectionCode || ''}
+                  </h4>
+                  <div class="flex items-center gap-3 text-xs text-gray-600">
+                    <span class="flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      ${timeStr}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      ${raw.location || 'No location'}
+                    </span>
+                  </div>
+                  <div class="mt-2">
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium border rounded-md ${statusClass}">
+                      ${status.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+                <a href="session-view.html?id=${raw.sessionId}" class="flex-shrink-0 text-gray-400 hover:text-brand-600 transition-colors" aria-label="View session">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Error loading upcoming sessions:', error);
+        container.innerHTML = `
+          <div class="px-6 py-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-red-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm text-gray-600 font-medium">Failed to load sessions</p>
+            <p class="text-xs text-gray-500 mt-1">Please try refreshing the page</p>
+          </div>
+        `;
+      }
+    }
+
+    async function loadTodaySessions() {
+      const container = document.getElementById('todaySessionsList');
+      if (!container || isAdminUser) {
+        return;
+      }
+
+      try {
+        const sessions = await fetchSessionsData();
+        const now = new Date();
+        const subtitle = document.getElementById('staffTodaySubtitle');
+        if (subtitle) {
+          subtitle.textContent = `Sessions scheduled for ${now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}`;
+        }
+        const todayKey = formatLocalDateKey(now);
+
+        const todaySessions = (sessions || [])
+          .map(session => ({
+            raw: session,
+            start: parseSessionDateTime(session),
+            end: parseSessionEndDateTime(session)
+          }))
+          .filter(item => {
+            const dateStr = item.raw.sessionDate || item.raw.scheduledDate;
+            return item.start && dateStr && (dateStr === todayKey || dateStr.startsWith(todayKey));
+          })
+          .sort((a, b) => a.start - b.start);
+
+        if (todaySessions.length === 0) {
+          container.innerHTML = `
+            <div class="px-6 py-12 text-center">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+              <p class="text-sm text-gray-600 font-medium">No sessions scheduled for today</p>
+              <p class="text-xs text-gray-500 mt-1">${isProfessorUser ? 'Create a session for your class schedule.' : 'Check back soon for scheduled sessions.'}</p>
+            </div>
+          `;
+          return;
+        }
+
+        const statusColors = {
+          'PENDING': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+          'OPEN': 'bg-green-50 text-green-700 border-green-200',
+          'CLOSED': 'bg-gray-50 text-gray-700 border-gray-200'
+        };
+
+        container.innerHTML = todaySessions.map(({ raw, start, end }) => {
+          const startTime = start.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          const endTime = end ? end.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+          const status = (raw.status || 'PENDING').toUpperCase();
+          const statusClass = statusColors[status] || statusColors['PENDING'];
+          let actionHref = `session-view.html?id=${raw.sessionId}`;
+          let actionLabel = 'View Session';
+          let actionColor = 'bg-gray-900 hover:bg-gray-800';
+
+          if (status === 'OPEN') {
+            actionHref = `mark-attendance.html?sessionId=${encodeURIComponent(raw.sessionId)}`;
+            actionLabel = 'Mark Attendance';
+            actionColor = 'bg-brand-500 hover:bg-brand-600';
+          }
+
+          return `
+            <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div class="min-w-0">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-1">
+                    ${raw.courseName || 'Course Session'} · ${raw.sectionCode || ''}
+                  </h4>
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                    <span class="flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      ${startTime}${endTime ? ` – ${endTime}` : ''}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      ${raw.location || 'No location'}
+                    </span>
+                  </div>
+                  <div class="mt-2">
+                    <span class="inline-flex items-center px-2 py-1 text-xs font-medium border rounded-md ${statusClass}">
+                      ${status.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+                <a href="${actionHref}" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white rounded-lg ${actionColor} transition-colors">
+                  ${actionLabel}
+                </a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error loading today sessions:', error);
+        container.innerHTML = `
+          <div class="px-6 py-12 text-center">
+            <svg class="w-12 h-12 mx-auto text-red-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm text-gray-600 font-medium">Unable to load today's sessions</p>
+            <p class="text-xs text-gray-500 mt-1">Please refresh to try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderStaffQuickActions() {
+      const grid = document.getElementById('staffQuickActionsGrid');
+      if (!grid) return;
+
+      if (isAdminUser) {
+        grid.innerHTML = '';
+        return;
+      }
+
+      const actions = [];
+
+      actions.push(
+        {
+          title: 'Manage Sessions',
+          description: 'Review upcoming sessions and update details.',
+          href: 'sessions.html',
+          gradient: 'from-indigo-500 to-indigo-600',
+          icon: `
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h6m-6 4h6m-6 4h6"></path>
+            </svg>
+          `
+        },
+        {
+          title: 'Mark Attendance',
+          description: 'Launch live recognition for open sessions.',
+          href: 'mark-attendance.html',
+          gradient: 'from-emerald-500 to-emerald-600',
+          icon: `
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          `
+        }
+      );
+
+      grid.innerHTML = actions.map(action => `
+        <a href="${action.href}" class="quick-action-card group bg-white rounded-2xl p-6 border border-gray-200 shadow-soft hover:shadow-lg hover:border-brand-300 transition-all">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-brand group-hover:shadow-lg transition-shadow">
+              ${action.icon}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-brand-600 transition-colors">${action.title}</h4>
+              <p class="text-sm text-gray-600">${action.description}</p>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    // ==================== INITIALISATION ====================
+    
+    window.addEventListener('load', async () => {
+      // Check authentication
+      currentUser = checkAuth();
+      if (!currentUser) return;
+
+      // Initialise user interface
+      initialiseUserInterface(currentUser);
+
+      // Load dashboard data
+      if (!isAdminUser) {
+        renderStaffQuickActions();
+      }
+
+      const tasks = [
+        loadStatistics(),
+        loadUpcomingSessions()
+      ];
+
+      if (!isAdminUser) {
+        tasks.push(loadTodaySessions());
+      }
+
+      await Promise.allSettled(tasks);
+    });
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+    
+    document.addEventListener('keydown', (e) => {
+      // ESC to close mobile menu
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+        closeMobileMenu();
+      }
+    });
+  </script>
+</body>
+</html>
